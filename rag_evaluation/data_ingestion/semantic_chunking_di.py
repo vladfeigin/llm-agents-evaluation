@@ -1,6 +1,12 @@
 """
 The environment variables are loaded from the `.env` file in the same directory as this notebook.
 """
+import sys
+import os
+
+# Add project root to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import argparse
 from utils.utils import (configure_aoai_env,
                          configure_logging,

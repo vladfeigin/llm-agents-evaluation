@@ -164,14 +164,15 @@ class RAG:
                                                                  config={"configurable": {
                                                                      "session_id": session_id}}
                                                                  )
+                logger.info(f"rag_main#session_id#response= {session_id}, response= {response}")
+                
             except Exception as e:
-                logger.error(f"chat#exception= {e}")
+                logger.error(f"rag_main chat#exception= {e}")
                 raise e
 
             return response["answer"]
 
-
-"""  
+ 
 if __name__ == "__main__":
     
     # Initialize the RAG class and empty history
@@ -199,4 +200,3 @@ if __name__ == "__main__":
     resp = rag.chat(new_session_id, question="List all my previous questions.")
     print (f"***response5 = {resp}")
 
-"""

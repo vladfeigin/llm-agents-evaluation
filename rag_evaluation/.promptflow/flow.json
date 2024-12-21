@@ -24,7 +24,7 @@
         "python_requirements_txt": "./requirements.txt"
     },
     "type": "chat",
-    "name": "llmops",
+    "name": "rag_evaluation",
     "inputs": {
         "session_id": {
             "type": "string"

@@ -3,19 +3,20 @@ AgentConfiguration:
   description: "RAG Agent configuration"
   config_version: 1.1
   agent_name: "rag_agent"
-  model_name: "gpt-35-turbo"
+  model_name: "gpt-4o-mini"
   model_version: "2024-08-01"
 
-  model_deployment: "gpt-4o-3"
-  model_deployment_endpoint: "https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-08-01-preview"
+  openai_api_version: "2024-10-01-preview"
+
+  #model_deployment: "gpt-4o-3"
+  #model_deployment_endpoint: "https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-08-01-preview"
   
   #model_deployment: "gpt-35-turbo"
   #model_deployment_endpoint: "https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
 
-  #model_deployment: "gpt-4o-mini"
-  #model_deployment_endpoint: "https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview"
-
-  openai_api_version: "2024-08-01-preview"
+  model_deployment: "gpt-4o-mini"
+  model_deployment_endpoint: "https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview"
+  
   retrieval: 
       search_type: "hybrid"
       top_k: 5

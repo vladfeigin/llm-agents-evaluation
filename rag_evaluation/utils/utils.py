@@ -13,8 +13,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-# from promptflow.tracing import trace, start_trace
-
 
 # load agent configuration (variant) from the YAML file
 def load_agent_configuration(agent_folder: str, agent_config_file: str) -> dict:

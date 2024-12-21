@@ -6,4 +6,12 @@ rag_evaluation/data_preparation/__pycache__/
 rag_evaluation/rag/__pycache__/
 rag_evaluation/utils/__pycache__/
 .venv/
-
+rag_evaluation/.env
+rag_evaluation/app.log
+rag_evaluation/batch_flow_output.txt
+rag_evaluation/__pycache__/runflow_local.cpython-311.pyc
+rag_evaluation/data_preparation/app.log
+rag_evaluation/__pycache__/__init__.cpython-311.pyc
+rag_evaluation/data_ingestion/app.log
+rag_evaluation/data_ingestion/__pycache__/__init__.cpython-311.pyc
+rag_evaluation/data_ingestion/__pycache__/semantic_chunking_di.cpython-311.pyc
