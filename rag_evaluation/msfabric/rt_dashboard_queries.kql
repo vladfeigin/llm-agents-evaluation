@@ -1,0 +1,118 @@
+// evaluations
+
+Evaluation | join kind=inner 
+EvaluationDetails on $left.item_OperationId == $right.operation_id and $left.item_ParentId == $right.parent_id
+| project EventTime, AgentName, ConfigVersion, ModelDeploymentName,Temperature, SearchType, SearchTopK, Groundedness, Relevance, Similarity,Coherence, ChatSystemPrompt, question, ground_truth, context, model_answer
+| render linechart 
+
+
+// generate query which compares the metrics Groundedness, Coherence, Relevance, Similarity per ModelDeploymentName
+//
+Evaluation
+| where AgentName == "rag_agent"
+| where todatetime(EventTime) >= todatetime ("2024-12-09")
+| summarize avgGroundedness=avg(Groundedness), avgCoherence=avg(Coherence), avgRelevance=avg(Relevance), avgSimilarity=avg(Similarity) by ModelDeploymentName
+| render linechart 
+
+
+Evaluation
+| where AgentName == "rag_agent"
+| where todatetime(EventTime) >= todatetime ("2024-12-09")
+| summarize avgGroundedness=avg(Groundedness), avgCoherence=avg(Coherence), avgRelevance=avg(Relevance), avgSimilarity=avg(Similarity) by ModelDeploymentName, bin(EventTime, 1d)
+| render linechart
+
+Evaluation
+| summarize 
+    AvgGroundedness = avg(Groundedness), 
+    AvgRelevance = avg(Relevance), 
+    AvgSimilarity = avg(Similarity), 
+    AvgCoherence = avg(Coherence)
+by 
+   AgentName, 
+   ConfigVersion, 
+   ModelName, 
+   ModelVersion, 
+   ModelDeploymentName, 
+   OpenAIAPIVersion, 
+   Temperature, 
+   Seed, 
+   SearchType, 
+   SearchTopK, 
+   IntentSystemPrompt, 
+   ChatSystemPrompt
+| order by ModelDeploymentName
+
+
+Evaluation
+| summarize 
+    AvgGroundedness = avg(Groundedness), 
+    AvgRelevance = avg(Relevance), 
+    AvgSimilarity = avg(Similarity), 
+    AvgCoherence = avg(Coherence)
+by ModelDeploymentName
+| order by AvgGroundedness desc
+
+
+Evaluation
+| summarize 
+    AvgGroundedness = avg(Groundedness),
+    AvgRelevance = avg(Relevance),
+    AvgSimilarity = avg(Similarity),
+    AvgCoherence = avg(Coherence)
+by ModelDeploymentName, bin(EventTime, 1h)
+| order by EventTime asc
+| render linechart 
+
+
+//groundedness
+Evaluation
+| summarize 
+    AvgGroundedness = avg(Groundedness)
+by ModelDeploymentName, bin(EventTime, 1h)
+| order by EventTime asc
+| render linechart 
+
+
+//relevancy
+Evaluation
+| summarize 
+    AvgRelevance = avg(Relevance)
+by ModelDeploymentName, bin(EventTime, 1h)
+| order by EventTime asc
+| render linechart 
+
+
+Evaluation
+| summarize 
+    AvgGroundedness = avg(Groundedness),
+    AvgRelevance = avg(Relevance),
+    AvgSimilarity = avg(Similarity),
+    AvgCoherence = avg(Coherence)
+by SearchType, SearchTopK
+| order by AvgRelevance desc
+
+
+EvaluationDetails
+
+OngoingChatFlow
+
+
+//-------------------------
+// ongoing
+//-------------------------
+OngoingChatFlow
+| summarize TotalTokensConsumed = sum(total_tokens) by bin(item_time, 1h)
+| render linechart 
+
+OngoingChatFlow
+| summarize AvgDurationMs = avg(duration) by bin(item_time, 1h)
+| render linechart 
+
+
+OngoingChatFlow
+| summarize TotalTokensConsumed = sum(total_tokens) by bin(item_time, 1h), lm_model
+| render linechart
+
+OngoingChatFlow
+| summarize AvgDurationMs = avg(duration) by bin(item_time, 1h), lm_model
+| render linechart 

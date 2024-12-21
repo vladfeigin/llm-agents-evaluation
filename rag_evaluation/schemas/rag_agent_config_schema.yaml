@@ -1,0 +1,49 @@
+AgentConfiguration:
+  type: object
+  description: "Configuration settings for the AI agent."
+  properties:
+    agent_name:
+      type: string
+    model_deployment:
+      type: string
+    model_name:
+      type: string
+    model_version:
+      type: string    
+    openai_api_version:
+      type: string
+    model_parameters:
+      type: object
+      properties:
+        temperature:
+          type: number
+        seed:
+          type: integer
+      required:
+        - temperature
+        - seed
+    intent_system_prompt:
+      type: string
+    chat_system_prompt:
+      type: string
+    human_template:
+      type: string
+    application_name:
+      type: string
+    config_version:
+      type: string
+    application_version:
+      type: string
+  required:
+    - agent_name
+    - model_deployment
+    - model_name
+    - model_version
+    - openai_api_version
+    - model_parameters
+    - intent_system_prompt
+    - chat_system_prompt
+    - human_template
+    - application_name
+    - config_version
+    - application_version
