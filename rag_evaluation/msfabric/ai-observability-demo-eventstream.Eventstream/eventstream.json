@@ -1,0 +1,35 @@
+{
+  "sources": [
+    {
+      "id": "8cbfd505-6e55-42b5-8084-5abd084d39fe",
+      "name": "AzureEventHub",
+      "type": "AzureEventHub",
+      "properties": {
+        "dataConnectionId": "7e5fdc69-22d8-43d0-a04c-d5897a82b874",
+        "consumerGroupName": "$Default",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      }
+    }
+  ],
+  "destinations": [],
+  "streams": [
+    {
+      "id": "a48274a8-77e5-4b06-9082-b478a9b55d46",
+      "name": "ai-observability-demo-eventstream-stream",
+      "type": "DefaultStream",
+      "properties": {},
+      "inputNodes": [
+        {
+          "name": "AzureEventHub"
+        }
+      ]
+    }
+  ],
+  "operators": [],
+  "compatibilityLevel": "1.0"
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Eventhouse",
+    "displayName": "ai-observability-demo-eventhouse",
+    "description": "ai-observability-demo-eventhouse"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "57b8dd76-cc8e-42c6-911e-60d14c8f3219"
+  }
+}

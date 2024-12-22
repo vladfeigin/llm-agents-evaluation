@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Eventstream",
+    "displayName": "ai-observability-demo-eventstream"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "59a98858-94a7-4975-ac64-affd977b0ce2"
+  }
+}
