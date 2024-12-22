@@ -122,7 +122,7 @@ The primary objective of the project is to illustrate the methods for monitoring
 
 #### Architecture
 
-![Architecture](docs/img/architecture.png)
+![Architecture](rag_evaluation/docs/img/architecture.png)
 
 
 #### Prerequisites
