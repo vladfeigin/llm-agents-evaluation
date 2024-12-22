@@ -122,7 +122,7 @@ The primary objective of the project is to illustrate the methods for monitoring
 
 #### Architecture
 
-![Architecture](docs/image/architecture.png)
+![Architecture](docs/img/architecture.png)
 
 
 #### Prerequisites
@@ -197,11 +197,9 @@ After ingestion, open Azure AI Search and verify the new index is created correc
     python -m ./rag_evaluation/runflow_local
     ```
 
+### Observability with Microsoft Fabric
 
-[Documentation](docs/Fabric Observability.md)
-
-
-
+[Fabric][docs/Fabric Observability.md]
 
 
 
@@ -232,3 +230,9 @@ After ingestion, open Azure AI Search and verify the new index is created correc
 
 
 
+
+
+
+
+
+[def]: docs/"Fabric Observability.md"
