@@ -145,7 +145,10 @@ AgentConfiguration:
 ```
 
 ## Project Description
+
+Users ingests their documents into an Azure AI Search index and interact with them using the RAG Agent. This allows users to ask questions about the ingested documents, leveraging the provided RAG Agent.
 The primary objective of the project is to illustrate the methods for monitoring and evaluating LLM-based applications. It showcases the functionality of Retrieval Augmented Generation (RAG), placing emphasis on monitoring and evaluation while also addressing certain aspects of local development.
+
 
 #### Project Modules
 
