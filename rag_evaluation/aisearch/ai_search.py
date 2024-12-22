@@ -23,9 +23,7 @@ logger = configure_logging()
 tracer = trace.get_tracer(__name__)
 
 # Azure Search configuration
-AZURE_AI_SEARCH_SERVICE_ENDPOINT = os.getenv(
-    "AZURE_AI_SEARCH_SERVICE_ENDPOINT")
-AZURE_AI_SEARCH_SERVICE_NAME = os.getenv("AZURE_AI_SEARCH_SERVICE_NAME")
+AZURE_AI_SEARCH_SERVICE_ENDPOINT = os.getenv("AZURE_AI_SEARCH_SERVICE_ENDPOINT")
 AZURE_AI_SEARCH_API_KEY = os.getenv("AZURE_AI_SEARCH_API_KEY")
 
 # Azure OpenAI configuration
