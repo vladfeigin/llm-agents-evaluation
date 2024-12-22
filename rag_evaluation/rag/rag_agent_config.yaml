@@ -2,6 +2,9 @@
 AgentConfiguration:
   description: "RAG Agent configuration"
   config_version: 1.1
+  application_version: "1.0"   
+  application_name: "rag_llmops_workshop" 
+  
   agent_name: "rag_agent"
   model_name: "gpt-4o-mini"
   model_version: "2024-08-01"
@@ -45,8 +48,4 @@ AgentConfiguration:
         </context>"
 
   human_template: "question: {input}"
-  #this parameter is deprecated in next version
-  application_version: "1.0"   #- this parameter must be on application level configuration
-  #this parameter is deprecated in next version
-  application_name: "rag_llmops_workshop" #- this parameter must be on application level configuration
   

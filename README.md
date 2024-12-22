@@ -4,9 +4,8 @@
 
 When developing LLM-based applications, common questions include:
 
-1. How to develop LLM-based applications?
-2. How to evaluate their quality?
-3. How to monitor them?
+1. How to evaluate their quality?
+2. How to monitor them?
 
 This project provides best practices and real examples based on production experience for the aforementioned questions.
 
@@ -30,8 +29,11 @@ For example the evaluation data set for conversational flow, could have the foll
 `question, ground-truth, context, chat-history`
 
 `question` is the question asked by the user.
+
 `chat-history` is a list of previous questions and answers.
+
 `ground-truth` is the expected answer.
+
 `context` is the context for the question, retrieved from the search index.
 
 Example:
@@ -44,7 +46,6 @@ Example:
 }
 ```
 
-
 #### Manual Evaluation
 
 With an evaluation dataset, you can perform manual evaluations to validate the LLM, model parameters, and prompts. This process helps ensure your idea works and is crucial step in developing LLM-based applications. 
@@ -54,8 +55,8 @@ Azure AI Foundry offers a Manual Evaluation tool.
 
 Decide about evaluation metrics you want to measure.
 
-For conversational flows, consider using metrics such as `*relevancy*`, `*similarity*`, and `*groundedness*`.
-For summarization tasks it could be `*similarity*` metric.
+For conversational flows, consider using metrics such as **`relevancy`**, **`similarity`**, and **`groundedness`**.
+For summarization tasks it could be **`similarity`** metric.
 The relevant metrics for a evaluation depend on your use case.
 Consider assigning greater weights to more significant metrics according to your workflow. 
 Calculate an aggregated score using these weights.
@@ -63,7 +64,7 @@ For instance, if standard phrasing is crucial in a model output, give higher wei
 In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
 In this project, we utilize the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk), which includes a variety of built-in evaluation metrics.
 
-#### 
+
 #### Automatic Evaluation Implementation
 
 Incorporate automatic evaluation into your project.
@@ -94,10 +95,57 @@ It is also worth mentioning that we use the [Prompt Flow Flex](https://microsoft
 
 For each Agent, we create a configuration file in YAML format, which includes all mandatory settings such as prompts, LLM, model parameters, and more. Any modification to this configuration file results in a new revision. During the evaluation of the Agents, we record the current revisions in the logs. 
 Logs are collected and analyzed in Microsoft Fabric.
-This allows us to compare the evaluation metrics for each Agent and determine how specific configuration revisions affect their performance. 
+This allows us to compare the evaluation metrics for each Agent and determine how specific configuration revisions affect their performance.
+Example of configuration file:
 
 
-## 
+```yaml
+AgentConfiguration:
+    description: "RAG Agent configuration"
+    config_version: 1.1
+    application_version: "1.0"   
+    application_name: "rag_llmops_workshop" 
+    
+    agent_name: "rag_agent"
+    model_name: "gpt-4o-mini"
+    model_version: "2024-08-01"
+
+    openai_api_version: "2024-10-01-preview"
+
+    model_deployment: "gpt-4o-mini"
+    model_deployment_endpoint: "https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview"
+    
+    retrieval: 
+            search_type: "hybrid"
+            top_k: 5
+            embedding_endpoint: "https://openai-australia-east-303474.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15"
+            embedding_deployment: "text-embedding-ada-002"
+            index_name: "micirosoft-tech-stack-index-0"
+            index_semantic_configuration_name: "vector-llmops-workshop-index-semantic-configuration"
+    model_parameters:
+        temperature: 0.0
+        seed: 42
+    intent_system_prompt: > 
+                Your task is to extract the user’s intent by reformulating their latest question into a standalone query that is understandable without prior chat history. 
+                Analyze the conversation to identify any contextual references in the latest question, and incorporate necessary details to make it self-contained. 
+                Ensure the reformulated question preserves the original intent. Do not provide an answer; only return the reformulated question. 
+                For example, if the latest question is ‘What about its pricing?’ and the chat history discusses Microsoft Azure, reformulate it to ‘What is the pricing of Microsoft Azure?’
+
+    chat_system_prompt: > 
+                You are a knowledgeable assistant specializing only in technology domain. 
+                Deliver concise and clear answers, emphasizing the main points of the user’s query.
+                Your responses should be based exclusively on the context provided in the prompt; do not incorporate external knowledge.
+                If the provided context is insufficient to answer the question, request additional information.
+                        
+                <context>
+                {context}
+                </context>"
+```
+
+
+
+
+
 ## Project Description
 The primary objective of the project is to illustrate the methods for monitoring and evaluating LLM-based applications. It showcases the functionality of Retrieval Augmented Generation (RAG), placing emphasis on monitoring and evaluation while also addressing certain aspects of local development.
 
@@ -209,10 +257,17 @@ After ingestion, open Azure AI Search and verify the new index is created correc
     ```sh
     python -m ./rag_evaluation/runflow_local
     ```
+Open Microsoft Fabric Real-Time dashboard. Select Evaluation Page and see the evaluation results.
+Compare the evaluation results with the previous evaluation results.
+
+![Fabric_Evaluation](rag_evaluation/docs/img/Fabric_evaluation.png)
+
+
+
 
 ### Observability with Microsoft Fabric
 
-![Fabric][def]
+![Fabric Observability Document][def]
 
 
 
