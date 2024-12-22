@@ -199,7 +199,7 @@ After ingestion, open Azure AI Search and verify the new index is created correc
 
 ### Observability with Microsoft Fabric
 
-![Fabric](rag_evaluation/docs/Fabric Observability.md)
+![Fabric][def]
 
 
 
@@ -235,3 +235,6 @@ After ingestion, open Azure AI Search and verify the new index is created correc
 
 
 
+
+
+[def]: rag_evaluation/docs/Fabric%20Observability.md
