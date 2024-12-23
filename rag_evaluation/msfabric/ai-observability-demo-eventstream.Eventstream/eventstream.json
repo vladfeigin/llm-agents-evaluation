@@ -16,7 +16,21 @@
       }
     }
   ],
-  "destinations": [],
+  "destinations": [
+    {
+      "id": "824dad77-f87b-4008-85d7-cc29e409fc6e",
+      "name": "ai-observability-traces-eventhouse-destination",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "DirectIngestion",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemId": "ae163f52-309b-47a0-a1bb-00ffe67dd373",
+        "databaseName": null,
+        "tableName": "traces"
+      },
+      "inputNodes": []
+    }
+  ],
   "streams": [
     {
       "id": "a48274a8-77e5-4b06-9082-b478a9b55d46",
