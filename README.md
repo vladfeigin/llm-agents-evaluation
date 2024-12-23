@@ -260,50 +260,22 @@ After ingestion, open Azure AI Search and verify the new index is created correc
     python -m ./rag_evaluation/runflow_local
     ```
 Open Microsoft Fabric Real-Time dashboard. Select Evaluation Page and see the evaluation results.
-Compare the evaluation results with the previous evaluation results.
+
 
 ![Fabric_Evaluation](rag_evaluation/docs/img/Fabric_evaluation.png)
+
+Change the model parameters or/and prompts in the `./rag/rag_agent_config.yaml` file and run the evaluation again.
+
+Compare the evaluation metrics with the previous evaluation results:
+
+![Fabric_Evaluation_2](rag_evaluation/docs/img/Fabric_evaluation_2.png)
+
 
 
 
 ### Observability with Microsoft Fabric
 
 ![Fabric Observability Document][def]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 [def]: rag_evaluation/docs/Fabric%20Observability.md
