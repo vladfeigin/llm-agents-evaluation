@@ -270,7 +270,12 @@ Compare the evaluation metrics with the previous evaluation results:
 
 ![Fabric_Evaluation_2](rag_evaluation/docs/img/Fabric_evaluation_2.png)
 
+You also have a detailed view of the evaluation results, which can help investigate the differences between evaluations and provide insights for each evaluation test:
 
+![Fabric_evaluation_detailed_1](rag_evaluation/docs/img/Fabric_evaluation_detailed_1.png)
+
+
+![Fabric_evaluation_detailed_2](rag_evaluation/docs/img/Fabric_evaluation_detailed_2.png)
 
 
 ### Observability with Microsoft Fabric
