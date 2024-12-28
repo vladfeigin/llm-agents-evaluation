@@ -3,11 +3,16 @@ description: A flow that runs the RAG application with all necessary modules.
 language: python
 
 additional_includes:
-  - ./aisearch/
-  - ./aimodel/
-  - ./utils/
-  - ./rag/
+  - ../../aimodel/
+  - ../../aisearch/
+  - ../../aimodel/
+  - ../../utils/
+  - ../../session_store
   - ./
+  - ../
+  - ../..
+  - ../../.env
+
 
 #environment_variables:
   #AZURE_OPENAI_API_KEY: "${openai-australia-east-303474.api_key}"
@@ -22,10 +27,10 @@ sample:
     context: ""
 
 #entry: rag.rag_main:RAG
-entry: runflow_local:rag_flow
+entry: rag_main:RAG
 
 environment:
   docker_image: "python:3.11-slim"
-  python_requirements_txt: ./requirements.txt
+  python_requirements_txt: ../../requirements.txt
  
 type: chat
