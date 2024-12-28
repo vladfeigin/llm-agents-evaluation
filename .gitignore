@@ -21,3 +21,6 @@ multiagent_evaluation/agents/__pycache__/
 .env
 multiagent_evaluation/batch_eval_output*.json
 multiagent_evaluation/eval_results*.json
+multiagent_evaluation/session_store/__pycache__/
+
+
