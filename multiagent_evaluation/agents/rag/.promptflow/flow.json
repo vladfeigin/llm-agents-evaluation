@@ -1,0 +1,41 @@
+{
+    "function": "__call__",
+    "$schema": "https://azuremlschemas.azureedge.net/promptflow/latest/flow.schema.json",
+    "description": "A flow that runs the RAG application with all necessary modules.",
+    "language": "python",
+    "additional_includes": [
+        "../../aimodel/",
+        "../../aisearch/",
+        "../../aimodel/",
+        "../../utils/",
+        "../../session_store",
+        "./",
+        "../",
+        "../..",
+        "../../.env"
+    ],
+    "sample": {
+        "inputs": {
+            "session_id": "1234",
+            "question": "What's Microsoft Fabric?",
+            "answer": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises",
+            "context": ""
+        }
+    },
+    "entry": "rag_main:RAG",
+    "environment": {
+        "docker_image": "python:3.11-slim",
+        "python_requirements_txt": "../../requirements.txt"
+    },
+    "type": "chat",
+    "name": "rag",
+    "inputs": {
+        "session_id": {
+            "type": "string"
+        },
+        "question": {
+            "type": "string",
+            "default": " "
+        }
+    }
+}
