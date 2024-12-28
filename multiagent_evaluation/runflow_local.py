@@ -6,7 +6,7 @@ from typing import Tuple
 from promptflow.client import PFClient
 from promptflow.entities import Run
 from promptflow.tracing import start_trace
-from rag.rag_main import RAG
+from agents.rag.rag_main import RAG
 from evaluation.evalflow import eval_batch
 from utils.utils import configure_logging, configure_tracing, configure_aoai_env, load_agent_configuration
 
@@ -15,18 +15,20 @@ tracing_collection_name = "rag_llmops"
 logger = configure_logging()
 tracer = configure_tracing(collection_name=tracing_collection_name)
 
-data = "./rag/data.jsonl"  # Path to the data file for batch evaluation
+data = "./agents/rag/data.jsonl"  # Path to the data file for batch evaluation
 
 # this function is used to run the RAG flow for batch evaluation
 
 start_trace()
 
+
 def rag_flow(session_id: str, question: str = " ") -> str:
     with tracer.start_as_current_span("flow::evaluation::rag_flow") as span:
-        rag = RAG(os.getenv("AZURE_OPENAI_KEY"))
+        rag = RAG()
         return rag(session_id, question)
 
 # run the flow
+
 
 def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
     logger.info("Running the flow for batch.")
@@ -47,7 +49,7 @@ def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
                 },
                 model_config=configure_aoai_env(),
                 tags={"run_configuraton": load_agent_configuration(
-                    "rag", "rag_agent_config.yaml")},
+                    "agents/rag", "rag_agent_config.yaml")},
                 stream=True,  # To see the running progress of the flow in the console
             )
         except Exception as e:

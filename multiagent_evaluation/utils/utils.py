@@ -23,7 +23,6 @@ def load_agent_configuration(agent_folder: str, agent_config_file: str) -> dict:
 
     # Get the directory of the project root
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    print(f"project_root= {project_root}")
 
     # Construct the absolute path to the configuration file
     config_path = os.path.join(project_root, agent_folder, agent_config_file)

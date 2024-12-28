@@ -3,7 +3,7 @@
 # it leverages AIModule class and aisearch module to search for the answer
 # create RAG class
 
-
+import os
 # initialize all environment variables from .env file
 #from opentelemetry import trace
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -13,13 +13,14 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
-from utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
-from rag.session_store import SimpleInMemorySessionStore
-from aimodel.ai_model import AIModel
-from aisearch.ai_search import AISearch
-import os
+
 from dotenv import load_dotenv
 load_dotenv()
+
+from utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
+from session_store.session_store import SimpleInMemorySessionStore
+from aimodel.ai_model import AIModel
+from aisearch.ai_search import AISearch
 
 # Configure tracing and logging
 logger = configure_logging()
@@ -28,17 +29,17 @@ tracer = configure_tracing(__file__)
 
 class RAG:
 
-    def __init__(self, api_key: str) -> None:
+    def __init__(self) -> None:
 
         logger.info("RAG.Initializing RAG")
         try:
             # load configuration from variant yaml
             rag_config = load_agent_configuration(
-                "rag", "rag_agent_config.yaml")
+                "agents/rag", "rag_agent_config.yaml")
             logger.info(f"rag_config = {rag_config}")
-
+            self.api_key = os.getenv("AZURE_OPENAI_KEY")
             # check if ragConfig is not None - throw exception
-            if rag_config is None or api_key is None:
+            if rag_config is None or self.api_key is None:
                 logger.error("agent config and api_key are required")
                 raise ValueError("agent config and api_key are required")
 
@@ -49,7 +50,7 @@ class RAG:
                 azure_deployment=self.rag_config["AgentConfiguration"]["model_deployment"],
                 openai_api_version=self.rag_config["AgentConfiguration"]["openai_api_version"],
                 azure_endpoint=self.rag_config["AgentConfiguration"]["model_deployment_endpoint"],
-                api_key=api_key
+                api_key=self.api_key
             )
             # init the AISearch class , enveloping the Azure Search retriever
             self.aisearch = AISearch(self.rag_config["AgentConfiguration"]["retrieval"]["embedding_deployment"],
@@ -174,11 +175,15 @@ class RAG:
 
  
 if __name__ == "__main__":
+        print("$$$$$$$$$$$$rag_main.py") 
+        rag = RAG()
+        
+   
     
-    # Initialize the RAG class and empty history
+""" 
+     # Initialize the RAG class and empty history
     import uuid
     rag = RAG()
-    
     session_id = str(uuid.uuid4())
     resp = rag(session_id, "What's Microsoft Fabric?")
     print (f"***response1 = {resp}")
@@ -200,3 +205,4 @@ if __name__ == "__main__":
     resp = rag.chat(new_session_id, question="List all my previous questions.")
     print (f"***response5 = {resp}")
 
+"""
