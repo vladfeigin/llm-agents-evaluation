@@ -1,4 +1,4 @@
-# Methodology of developing and evaluation LLM-based applications 
+# Methodology of development and evaluation of LLM-based applications 
 
 ## Intro 
 
@@ -20,12 +20,12 @@ The datasets emulate your actual interaction with LLM or with LLM based Agent.
 Keep these points in mind:
 
     - Domain experts should prepare the data sets.
-    - Tailor the data set structure to your use case.
+    - Tailor the dataset structure to your use case.
     - Start with a small size of 20-30 samples of your flow.
     - Regularly update data sets with real production examples.
     - For a multi-agent system, create a dedicated dataset for each agent.
 
-For example the evaluation data set for conversational flow, could have the following schema:
+For example, the evaluation dataset for conversational flow, could have the following schema:
 
 **`question, ground-truth, context, chat-history`**
 
@@ -49,7 +49,7 @@ Example:
 
 #### Manual Evaluation
 
-With an evaluation dataset, you already can perform manual evaluations to validate the LLM, model parameters, and prompts. This process helps ensure your idea works and is crucial step in developing LLM-based applications. 
+With an evaluation dataset, you can perform manual evaluations to validate the LLM, model parameters, and prompts. This process helps ensure your idea works and is a crucial step in developing LLM-based applications. 
 Azure AI Foundry offers a Manual Evaluation tool. 
 
 #### Evaluation Metrics 
@@ -57,11 +57,11 @@ Azure AI Foundry offers a Manual Evaluation tool.
 Decide about evaluation metrics you want to measure.
 
 For conversational flows, consider using metrics such as **`relevancy`**, **`similarity`**, and **`groundedness`**.
-For summarization tasks it could be **`similarity`** metric.
+For summarization tasks you can use **`similarity`** metric.
 The relevant metrics for a evaluation depend on your use case.
 Consider assigning greater weights to more significant metrics according to your workflow. 
 Calculate an aggregated score using these weights.
-For instance, if standard phrasing is crucial in a model output, give higher weight to the similarity metric comparing ground truth and model answers.
+For instance, if standard phrasing is crucial in a model output, give higher weights to the similarity metric comparing ground truth and model answers.
 In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
 In this project, we utilize the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk), which includes a variety of built-in evaluation metrics.
 
@@ -70,13 +70,13 @@ In this project, we utilize the [Azure Evaluation SDK](https://learn.microsoft.c
 
 Incorporate automatic evaluation into your project.
 The implementation depends on your flow. For conversational flows, another advanced model is typically needed for evaluation, the judge model.
-The project in this repo uses the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk) and [Azure AI Foundry Evaluator Library](http://ai.azure.com/), which offers ready prompts specifically designed for evaluations.
-Integrate automatic evaluations into your CI/CD pipeline. Fail the build if metrics drop below predefined quality thresholds.
+The project in this repo uses the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk) and [Azure AI Foundry Evaluator Library](http://ai.azure.com/), which offers ready to use prompts, specifically designed for evaluations.
+Integrate automatic evaluations into your CI/CD pipeline. Make the build fail, if metrics drop below predefined quality thresholds.
 
 #### Running Evaluations
 
 Run evalations during development and in CI/CD.
-In this project, we use the [Azure AI Foundry Prompt Flow SDK](https://github.com/microsoft/promptflow) to run automatic evaluations on the evaluation data set.
+In this project, we use the [Azure AI Foundry Prompt Flow SDK](https://github.com/microsoft/promptflow) to run automatic evaluations on the evaluation dataset.
 
 
 #### Monitoring 
@@ -146,7 +146,7 @@ AgentConfiguration:
 
 ## Project Description
 
-Users ingests their documents into an Azure AI Search index and interact with them using the RAG Agent. This allows users to ask questions about the ingested documents, leveraging the provided RAG Agent.
+Users ingests their documents into an Azure AI Search index and interacts with them using the RAG Agent. This allows users to ask questions about the ingested documents, leveraging the provided RAG Agent.
 The primary objective of the project is to illustrate the methods for monitoring and evaluating LLM-based applications. It showcases the functionality of Retrieval Augmented Generation (RAG), placing emphasis on monitoring and evaluation while also addressing certain aspects of local development.
 
 
@@ -172,7 +172,7 @@ The primary objective of the project is to illustrate the methods for monitoring
 
 #### Architecture
 
-![Architecture](rag_evaluation/docs/img/architecture.png)
+![Architecture](multiagent_evaluation/docs/img/architecture.png)
 
 
 #### Prerequisites
@@ -181,7 +181,7 @@ The primary objective of the project is to illustrate the methods for monitoring
 - **Azure Document Intelligence service instance**
 - **Microsoft Fabric** (Trial could be used)
 - **Visual Studio Code**
-- **Python 3.11** (The project has been tested with Python version 3.11 on Mac)
+- **Python 3.11** (The project has been tested with Python version 3.11 on Mac and Windows)
 
 #### Project Installation
 1. Clone the project from GitHub:
@@ -230,57 +230,52 @@ After ingestion, open Azure AI Search and verify the new index is created correc
 
 #### Running RAG Agent locally
 
-1. Change the directory to the project root folder: `rag_evaluation` folder.
-2. In `./rag/rag_agent_config.yaml`, change the search index name to the newly created index name from the previous step.
+1. Change the directory to the project root folder: `multiagent_evaluation` folder.
+2. In `./agents/rag/rag_agent_config.yaml`, change the search index name to the newly created index name from the previous step.
 3. From the command line, run:
     ```sh
     pf flow serve --source ./ --port 8080 --host localhost
     ```
     This will open a chat web interface. Now you can ask questions about the ingested documents.
 
- ![PF_WebUI](rag_evaluation/docs/img/rag_evaluation_web_chat_ui.png)
+ ![PF_WebUI](multiagent_evaluation/docs/img/multiagent_evaluation_web_chat_ui.png)
 
 
 4. Open Prompt Flow local traces: `http://localhost:23337/v1.0/ui/traces/` generated by the previous step.
 
-    ![PF_Trace1](rag_evaluation/docs/img/promptflow_traces-1.png)
+    ![PF_Trace1](multiagent_evaluation/docs/img/promptflow_traces-1.png)
     
-    ![PF_Trace2](rag_evaluation/docs/img/promptflow_traces-2.png)
-
+    ![PF_Trace2](multiagent_evaluation/docs/img/promptflow_traces-2.png)
 
 5. Open Microsoft Fabric Real-Time dashboard. Select Ongoing Page and see the details of using RAG agent.
 
-    ![Fabric_Ongoing](rag_evaluation/docs/img/Fabric_ongoing.png)
-
+    ![Fabric_Ongoing](multiagent_evaluation/docs/img/Fabric_ongoing.png)
 
 #### Running RAG Agent evaluation
 1. Replace the `./rag/data.json` file with your relevant dataset. This dataset is for RAG Agent evaluation.
 2. Once you have created a relevant dataset, execute the command from the command line:
     ```sh
-    python -m ./rag_evaluation/runflow_local
+    python -m ./multiagent_evaluation/runflow_local
     ```
 Open Microsoft Fabric Real-Time dashboard. Select Evaluation Page and see the evaluation results.
 
 
-![Fabric_Evaluation](rag_evaluation/docs/img/Fabric_evaluation.png)
+![Fabric_Evaluation](multiagent_evaluation/docs/img/Fabric_evaluation.png)
 
 Change the model parameters or/and prompts in the `./rag/rag_agent_config.yaml` file and run the evaluation again.
 
 Compare the evaluation metrics with the previous evaluation results:
 
-![Fabric_Evaluation_2](rag_evaluation/docs/img/Fabric_evaluation_2.png)
+![Fabric_Evaluation_2](multiagent_evaluation/docs/img/Fabric_evaluation_2.png)
 
 You also have a detailed view of the evaluation results, which can help investigate the differences between evaluations and provide insights for each evaluation test:
 
-![Fabric_evaluation_detailed_1](rag_evaluation/docs/img/Fabric_evaluation_detailed_1.png)
+![Fabric_evaluation_detailed_1](multiagent_evaluation/docs/img/Fabric_evaluation_detailed_1.png)
 
 
-![Fabric_evaluation_detailed_2](rag_evaluation/docs/img/Fabric_evaluation_detailed_2.png)
+![Fabric_evaluation_detailed_2](multiagent_evaluation/docs/img/Fabric_evaluation_detailed_2.png)
 
 
 ### Observability with Microsoft Fabric
 
-![Fabric Observability Document][def]
-
-
-[def]: rag_evaluation/docs/Fabric%20Observability.md
+[Fabric Observability Document](multiagent_evaluation/docs/Fabric%20Observability.md)
