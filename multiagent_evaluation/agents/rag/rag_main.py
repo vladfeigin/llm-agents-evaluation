@@ -13,6 +13,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
+from promptflow.tracing import start_trace
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -26,6 +27,7 @@ from aisearch.ai_search import AISearch
 logger = configure_logging()
 tracer = configure_tracing(__file__)
 
+start_trace()
 
 class RAG:
 

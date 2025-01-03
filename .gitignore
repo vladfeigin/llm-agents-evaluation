@@ -23,4 +23,7 @@ multiagent_evaluation/batch_eval_output*.json
 multiagent_evaluation/eval_results*.json
 multiagent_evaluation/session_store/__pycache__/
 
+multiagent_evaluation/agents/nl2sql/test.py
+multiagent_evaluation/session_store/__pycache__/
+
 
