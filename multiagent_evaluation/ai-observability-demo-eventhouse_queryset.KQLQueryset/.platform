@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "KQLQueryset",
+    "displayName": "ai-observability-demo-eventhouse_queryset",
+    "description": "ai-observability-demo-eventhouse_queryset"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "5fb48efa-202a-46e7-be17-79abddae3c1f"
+  }
+}

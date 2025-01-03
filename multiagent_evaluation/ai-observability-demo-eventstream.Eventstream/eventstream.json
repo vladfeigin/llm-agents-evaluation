@@ -1,0 +1,262 @@
+{
+  "sources": [
+    {
+      "id": "8cbfd505-6e55-42b5-8084-5abd084d39fe",
+      "name": "AzureEventHub",
+      "type": "AzureEventHub",
+      "properties": {
+        "dataConnectionId": "7e5fdc69-22d8-43d0-a04c-d5897a82b874",
+        "consumerGroupName": "$Default",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      }
+    }
+  ],
+  "destinations": [
+    {
+      "id": "489dcf17-767f-412d-be7a-b9150ff4f164",
+      "name": "ai-observability-demo-eventhouse-direct-destination",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "DirectIngestion",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemId": "0564b24f-fbe7-4c34-bebb-4f2b4f21bf42",
+        "databaseName": null,
+        "tableName": "opentel_traces"
+      },
+      "inputNodes": []
+    },
+    {
+      "id": "824dad77-f87b-4008-85d7-cc29e409fc6e",
+      "name": "ai-observability-traces-eventhouse-destination",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "DirectIngestion",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemId": "0564b24f-fbe7-4c34-bebb-4f2b4f21bf42",
+        "databaseName": null,
+        "tableName": "traces"
+      },
+      "inputNodes": [
+        {
+          "name": "ai-observability-demo-eventstream-stream"
+        }
+      ],
+      "inputSchemas": [
+        {
+          "name": "ai-observability-demo-eventstream-stream",
+          "schema": {
+            "columns": [
+              {
+                "name": "records",
+                "type": "Array",
+                "fields": null,
+                "items": {
+                  "name": null,
+                  "type": "Record",
+                  "fields": [
+                    {
+                      "name": "time",
+                      "type": "DateTime",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "resourceId",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ResourceGUID",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "Type",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "AppRoleInstance",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "AppRoleName",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientBrowser",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientCity",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientCountryOrRegion",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientIP",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientModel",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientOS",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientStateOrProvince",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ClientType",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "IKey",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "_BilledSize",
+                      "type": "BigInt",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "SDKVersion",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "Properties",
+                      "type": "Record",
+                      "fields": [
+                        {
+                          "name": "gen_ai.system",
+                          "type": "Nvarchar(max)",
+                          "fields": null,
+                          "items": null
+                        },
+                        {
+                          "name": "gen_ai.response.model",
+                          "type": "Nvarchar(max)",
+                          "fields": null,
+                          "items": null
+                        },
+                        {
+                          "name": "gen_ai.token.type",
+                          "type": "Nvarchar(max)",
+                          "fields": null,
+                          "items": null
+                        }
+                      ],
+                      "items": null
+                    },
+                    {
+                      "name": "Name",
+                      "type": "Nvarchar(max)",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "Sum",
+                      "type": "Float",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "Min",
+                      "type": "Float",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "Max",
+                      "type": "Float",
+                      "fields": null,
+                      "items": null
+                    },
+                    {
+                      "name": "ItemCount",
+                      "type": "BigInt",
+                      "fields": null,
+                      "items": null
+                    }
+                  ],
+                  "items": null
+                }
+              },
+              {
+                "name": "EventProcessedUtcTime",
+                "type": "DateTime",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "PartitionId",
+                "type": "BigInt",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "EventEnqueuedUtcTime",
+                "type": "DateTime",
+                "fields": null,
+                "items": null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "streams": [
+    {
+      "id": "a48274a8-77e5-4b06-9082-b478a9b55d46",
+      "name": "ai-observability-demo-eventstream-stream",
+      "type": "DefaultStream",
+      "properties": {},
+      "inputNodes": [
+        {
+          "name": "AzureEventHub"
+        }
+      ]
+    }
+  ],
+  "operators": [],
+  "compatibilityLevel": "1.0"
+}
