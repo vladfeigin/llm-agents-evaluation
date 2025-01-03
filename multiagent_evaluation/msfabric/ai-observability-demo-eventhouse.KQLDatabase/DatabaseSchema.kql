@@ -7,28 +7,25 @@
 ```
 [{"Properties":{"Path":"$['records']"},"column":"records","datatype":""},{"Properties":{"Path":"$['EventProcessedUtcTime']"},"column":"EventProcessedUtcTime","datatype":""},{"Properties":{"Path":"$['PartitionId']"},"column":"PartitionId","datatype":""},{"Properties":{"Path":"$['EventEnqueuedUtcTime']"},"column":"EventEnqueuedUtcTime","datatype":""}]
 ```
-.create-merge table Evaluation (EventTime:datetime, item_OperationId:guid, item_ParentId:string, AgentName:string, ConfigVersion:string, ModelName:string, ModelVersion:string, ModelDeploymentName:string, OpenAIAPIVersion:string, Deployment:string, TotalTokens:long, PromptTokens:long, CompletionTokens:long, Duration:long, Temperature:string, Seed:long, EmbeddingEndpoint:string, EmbeddingDeployment:string, SearchType:string, SearchTopK:long, IntentSystemPrompt:string, ChatSystemPrompt:string, Coherence:real, Groundedness:real, Relevance:real, Similarity:real) 
-.create-merge table OngoingChat (item_time:datetime, operation_id:guid, duration:int, success:string, prompt:dynamic, generated_message:dynamic, total_tokens:int, prompt_tokens:int, completion_tokens:int, lm_model:string) 
-.create-merge table OngoingApplication (item_time:datetime, operation_id:guid, application_name:string, application_version:string, session_id:string, config_version:string, deployment:string) 
-.create-merge table Application (item_time:datetime, operation_id:guid, application_name:string, application_version:string, session_id:string, config_version:string, duration:int, success:string, prompt:dynamic, generated_message:dynamic, total_tokens:int, prompt_tokens:int, completion_tokens:int, lm_model:string, deployment:string) 
+.create-merge table opentel_traces (records:dynamic, EventProcessedUtcTime:datetime, PartitionId:string, EventEnqueuedUtcTime:datetime) 
+.create-or-alter table opentel_traces ingestion json mapping 'opentel_traces_mapping'
+```
+[{"Properties":{"Path":"$['records']"},"column":"records","datatype":""},{"Properties":{"Path":"$['EventProcessedUtcTime']"},"column":"EventProcessedUtcTime","datatype":""},{"Properties":{"Path":"$['PartitionId']"},"column":"PartitionId","datatype":""},{"Properties":{"Path":"$['EventEnqueuedUtcTime']"},"column":"EventEnqueuedUtcTime","datatype":""}]
+```
+.create-merge table EvaluationRaw (EventTime:datetime, OperationId:guid, ParentId:string, AgentName:string, ConfigVersion:string, ModelName:string, ModelVersion:string, ModelDeploymentName:string, OpenAIAPIVersion:string, Deployment:string, TotalTokens:long, PromptTokens:long, CompletionTokens:long, Duration:long, Temperature:string, Seed:long, EmbeddingEndpoint:string, EmbeddingDeployment:string, SearchType:string, SearchTopK:long, IntentSystemPrompt:string, ChatSystemPrompt:string, EvaluationResult:dynamic) 
+.create-merge table EvaluationMetrics (EventTime:datetime, OperationId:guid, ParentId:string, AgentName:string, ConfigVersion:string, ModelName:string, ModelVersion:string, ModelDeploymentName:string, OpenAIAPIVersion:string, Deployment:string, TotalTokens:long, PromptTokens:long, CompletionTokens:long, Duration:long, Temperature:string, Seed:long, EmbeddingEndpoint:string, EmbeddingDeployment:string, SearchType:string, SearchTopK:long, IntentSystemPrompt:string, ChatSystemPrompt:string, Coherence:real, Groundedness:real, Relevance:real, Similarity:real) 
+.create-merge table OngoingUsage (EventTime:datetime, OperationId:guid, ParentId:guid, Success:string, Duration:int, Prompt:dynamic, Output:dynamic, ModelName:string, TotalTokens:int, PromptTokens:int, CompletionTokens:int) 
+.create-merge table ApplicationDetails (EventTime:datetime, OperationId:guid, ParentId:string, ApplicationName:string, ApplicationVersion:string, SessionId:string, ConfigVersion:string, Deployment:string) 
+.create-merge table ApplicationUsage (EventTime:datetime, OperationId:guid, ParentId:string, ApplicationName:string, ApplicationVersion:string, SessionId:string, ConfigVersion:string, Duration:int, Success:string, Prompt:dynamic, Output:dynamic, TotalTokens:int, PromptTokens:int, CompletionTokens:int, ModelName:string, Deployment:string) 
 .create-or-alter function with (skipvalidation = "true") EvaluationFlowInsert() {
      let AppTracesTbl = 
-        traces
+        opentel_traces
         | extend item = parse_json(records)
         | mv-expand item
-        | serialize
-        | extend RowNumber = row_number(1, prev(PartitionId) != PartitionId) 
         | where item.Type == "AppTraces" 
-        | where todatetime(EventProcessedUtcTime) >= todatetime ("2024-12-09")
         | project
             EventProcessedUtcTime,
-            PartitionId,
-            RowNumber,
-            item,
-            metricName = item.metricName,
-            Target = item.Target,
-            Type = item.Type,
-            PropertiesPayload = dynamic_to_json(item.Properties.payload);
+            item;
      AppTracesTbl
     | project
         item_time = todatetime((item)["time"]),
@@ -65,8 +62,8 @@
     | sort by item_time asc
     | project
         EventTime = item_time,
-        item_OperationId,
-        item_ParentId,
+        OperationId = item_OperationId,
+        ParentId = item_ParentId,
         AgentName,
         ConfigVersion,
         ModelName,
@@ -150,6 +147,187 @@
         | extend deployment = tostring(parsed_item.Properties.endpoint)
         | project item_time, operation_id, application_name, application_version, session_id, config_version,deployment
       }
-.alter table Evaluation policy update "[{\"IsEnabled\":true,\"Source\":\"traces\",\"Query\":\"EvaluationFlowInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
-.alter table OngoingChat policy update "[{\"IsEnabled\":true,\"Source\":\"traces\",\"Query\":\"OngoingChatInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
-.alter table OngoingApplication policy update "[{\"IsEnabled\":true,\"Source\":\"traces\",\"Query\":\"OngoingApplicationInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+.create-or-alter function with (skipvalidation = "true") EvaluationMetricsFlowInsert() {
+     let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppTraces" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+    | project
+        EventTime = todatetime((item)["time"]),
+        OperationId = toguid(item.OperationId),
+        ParentId = tostring(item.ParentId),
+        Message = dynamic_to_json(item.Message)
+    | where Message has "batch-evaluation-flow-metrics"
+    | extend parsed_json = parse_json(Message)
+    | extend 
+        AgentName = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.agent_name),		
+        ConfigVersion = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.config_version),
+        ModelName = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_name),
+        ModelVersion = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_version),
+        ModelDeploymentName = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_deployment),
+        OpenAIAPIVersion = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.openai_api_version),
+        IntentSystemPrompt = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.intent_system_prompt),
+        ChatSystemPrompt = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.chat_system_prompt),
+        Deployment = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_deployment_endpoint),
+        Temperature = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_parameters.temperature),
+        Seed = tolong(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_parameters.seed),
+        EmbeddingEndpoint = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.embedding_endpoint),
+        EmbeddingDeployment = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.embedding_deployment),
+        SearchType = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.search_type),
+        SearchTopK = tolong(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.top_k),
+        TotalTokens = tolong(parsed_json.metadata.properties.system_metrics.total_tokens),
+        PromptTokens = tolong(parsed_json.metadata.properties.system_metrics.prompt_tokens),
+        CompletionTokens = tolong(parsed_json.metadata.properties.system_metrics.completion_tokens),
+        Duration = tolong(parsed_json.metadata.properties.system_metrics.duration)       
+    | where isnotempty(AgentName)         
+    | mv-expand result = parsed_json.result
+    | extend metric = tostring(result.metric), score = toreal(result.score)
+    | project-away Message, parsed_json, result
+    | evaluate pivot(metric, any(score))
+    | sort by EventTime asc
+    | project
+        EventTime,
+        OperationId,
+        ParentId,
+        AgentName,
+        ConfigVersion,
+        ModelName,
+        ModelVersion,
+        ModelDeploymentName,
+        OpenAIAPIVersion,
+        Deployment,
+        TotalTokens,
+        PromptTokens,
+        CompletionTokens,
+        Duration,
+        Temperature,
+        Seed,
+        EmbeddingEndpoint,
+        EmbeddingDeployment,
+        SearchType,
+        SearchTopK,
+        IntentSystemPrompt,
+        ChatSystemPrompt,
+        Coherence = coherence,
+        Groundedness = groundedness,
+        Relevance = relevance,
+        Similarity = similarity
+ }
+.create-or-alter function with (skipvalidation = "true") EvaluationRawFlowInsert() {
+     let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppTraces" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+    | project
+        EventTime = todatetime((item)["time"]),
+        OperationId = toguid(item.OperationId),
+        ParentId = tostring(item.ParentId),
+        Message = dynamic_to_json(item.Message)
+    | where Message has "batch-evaluation-flow-raw"
+    | extend parsed_json = parse_json(Message)
+    | extend 
+        AgentName = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.agent_name),		
+        ConfigVersion = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.config_version),
+        ModelName = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_name),
+        ModelVersion = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_version),
+        ModelDeploymentName = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_deployment),
+        OpenAIAPIVersion = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.openai_api_version),
+        IntentSystemPrompt = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.intent_system_prompt),
+        ChatSystemPrompt = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.chat_system_prompt),
+        Deployment = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_deployment_endpoint),
+        Temperature = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_parameters.temperature),
+        Seed = tolong(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.model_parameters.seed),
+        EmbeddingEndpoint = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.embedding_endpoint),
+        EmbeddingDeployment = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.embedding_deployment),
+        SearchType = tostring(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.search_type),
+        SearchTopK = tolong(parsed_json.metadata.tags.run_configuraton.AgentConfiguration.retrieval.top_k),
+        TotalTokens = tolong(parsed_json.metadata.properties.system_metrics.total_tokens),
+        PromptTokens = tolong(parsed_json.metadata.properties.system_metrics.prompt_tokens),
+        CompletionTokens = tolong(parsed_json.metadata.properties.system_metrics.completion_tokens),
+        Duration = tolong(parsed_json.metadata.properties.system_metrics.duration),
+        EvaluationDataSet = tostring(parsed_json.metadata.data),
+        EvaluationPortalUrl = tostring(parsed_json.metadata.portal_url)    
+    | where isnotempty(AgentName)         
+    | mv-expand EvaluationResult = parsed_json.result
+    | sort by EventTime asc
+    | project
+        EventTime,
+        OperationId,
+        ParentId ,
+        AgentName,
+        ConfigVersion,
+        ModelName,
+        ModelVersion,
+        ModelDeploymentName,
+        OpenAIAPIVersion,
+        Deployment,
+        TotalTokens,
+        PromptTokens,
+        CompletionTokens,
+        Duration,
+        Temperature,
+        Seed,
+        EmbeddingEndpoint,
+        EmbeddingDeployment,
+        SearchType,
+        SearchTopK,
+        IntentSystemPrompt,
+        ChatSystemPrompt,
+        EvaluationResult
+ }
+.create-or-alter function with (skipvalidation = "true") OngoingUsageInsert() {   
+        let ongoing_expanded_table=
+        opentel_traces
+        | mv-expand records 
+        | where records.Type == 'AppDependencies';
+        ongoing_expanded_table
+        | project
+            EventTime = todatetime((records)["time"]),
+            OperationId = toguid(records.OperationId),
+            ParentId = toguid(records.ParentId),
+            records
+        | extend properties = records.Properties
+        | where properties.span_type in ('LLM', "Embedding") 
+        | where properties.function in ('openai.resources.chat.completions.Completions.create', 'openai.resources.embeddings.Embeddings.create')
+        | extend Success = tostring(records.Success)
+        | extend Duration = toint(records.DurationMs)
+        | extend ModelName = tostring (properties.['llm.response.model'])
+        | extend Prompt = properties.inputs
+        | extend Output = properties['llm.generated_message']
+        | extend TotalTokens = toint(properties["llm.usage.total_tokens"])
+        | extend PromptTokens = toint(properties["llm.usage.prompt_tokens"])
+        | extend CompletionTokens = toint(properties["llm.usage.completion_tokens"])
+        | project EventTime, OperationId, ParentId, Success, Duration, Prompt, Output, ModelName, TotalTokens, PromptTokens, CompletionTokens
+      }
+.create-or-alter function with (skipvalidation = "true") ApplicationDetailsInsert() {   
+        let ongoing_appl_expanded_table=
+         opentel_traces
+        | mv-expand records 
+        | where records.Type == 'AppDependencies';
+        ongoing_appl_expanded_table
+        | project
+            EventTime = todatetime(records["time"]),
+            OperationId = toguid(records.OperationId),
+            ParentId = tostring(records.ParentId),
+        records
+        | where records.Target == "RAG.__chat__" 
+        | extend ApplicationName = tostring(records.Properties.application_name)
+        | extend ApplicationVersion = tostring(records.Properties.application_version)
+        | extend SessionId = tostring(records.Properties.session_id)
+        | extend ConfigVersion = tostring(records.Properties.config_version)
+        | extend Deployment = tostring(records.Properties.endpoint)
+        | project EventTime, OperationId, ParentId, ApplicationName, ApplicationVersion, SessionId, ConfigVersion, Deployment}
+.alter table EvaluationRaw policy update "[{\"IsEnabled\":true,\"Source\":\"opentel_traces\",\"Query\":\"EvaluationRawFlowInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+.alter table EvaluationMetrics policy update "[{\"IsEnabled\":true,\"Source\":\"traces\",\"Query\":\"EvaluationMetricsFlowInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+.alter table OngoingUsage policy update "[{\"IsEnabled\":true,\"Source\":\"opentel_traces\",\"Query\":\"OngoingUsageInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+.alter table ApplicationDetails policy update "[{\"IsEnabled\":true,\"Source\":\"opentel_traces\",\"Query\":\"ApplicationDetailsInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
