@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "KQLDashboard",
+    "displayName": "ai-observability-demo-real-time-dashboard",
+    "description": "ai-observability-demo-real-time-dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "a7e9bcef-0b95-41f7-aa02-6ce8c96c7480"
+  }
+}
