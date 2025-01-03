@@ -80,7 +80,7 @@ def run_and_eval_flow(dump_output: bool = False):
         # serialize the results from dictionary to json
         logger.info(
             json.dumps({
-                "name": "batch-evaluation-flow",
+                "name": "batch-evaluation-flow-raw",
                 "metadata": base_run._to_dict(),
                 "result": eval_res.to_dict(orient='records')
             })
