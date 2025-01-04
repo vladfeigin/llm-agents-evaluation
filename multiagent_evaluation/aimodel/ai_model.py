@@ -1,6 +1,6 @@
 
 from logging import INFO, getLogger
-from utils.utils import configure_tracing
+from multiagent_evaluation.utils.utils import configure_tracing
 from langchain_openai import AzureChatOpenAI
 from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv

@@ -18,10 +18,10 @@ from promptflow.tracing import start_trace
 from dotenv import load_dotenv
 load_dotenv()
 
-from utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
-from session_store.session_store import SimpleInMemorySessionStore
-from aimodel.ai_model import AIModel
-from aisearch.ai_search import AISearch
+from multiagent_evaluation.utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
+from multiagent_evaluation.session_store.session_store import SimpleInMemorySessionStore
+from multiagent_evaluation.aimodel.ai_model import AIModel
+from multiagent_evaluation.aisearch.ai_search import AISearch
 
 # Configure tracing and logging
 logger = configure_logging()

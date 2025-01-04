@@ -1,5 +1,5 @@
 from logging import INFO, getLogger
-from utils.utils import configure_logging
+from multiagent_evaluation.utils.utils import configure_logging
 from opentelemetry import trace
 from azure.search.documents.indexes.models import (
     ScoringProfile,

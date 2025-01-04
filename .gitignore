@@ -26,4 +26,11 @@ multiagent_evaluation/session_store/__pycache__/
 multiagent_evaluation/agents/nl2sql/test.py
 multiagent_evaluation/session_store/__pycache__/
 
+multiagent_evaluation/evaluation_deprecated/__pycache__/
+multiagent_evaluation/session_store/__pycache__/
+multiagent_evaluation/agents/rag/evaluation/__pycache__/
+batch_eval_output*.json
+eval_results*.json
+multiagent_evaluation/evaluation\[deprecated]/__pycache__/
 
+multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
