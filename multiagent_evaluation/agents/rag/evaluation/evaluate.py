@@ -16,22 +16,33 @@ logger = configure_logging()
 tracer = configure_tracing(collection_name=tracing_collection_name)
 
 data = "./multiagent_evaluation/agents/rag/evaluation/data.jsonl"  # Path to the data file for batch evaluation
+GLOBAL_AGENT_CONFIG = None
 
 # this function is used to run the RAG flow for batch evaluation
 
 start_trace()
 
+#spawn in a dedicated process to run the RAG flow
+def rag_flow( session_id: str= " ", question: str = " ") -> str:
+    
+    # Read the environment variable, which will be a JSON string
+    agent_config_str = os.getenv("GLOBAL_AGENT_CONFIG", "")
+    if agent_config_str:
+        agent_config = json.loads(agent_config_str)
+    else:
+        agent_config = {}
 
-def rag_flow(session_id: str, question: str = " ") -> str:
+    logger.info(f"rag_flow:agent_config = {agent_config}")
+    
     with tracer.start_as_current_span("flow::evaluation::rag_flow") as span:
-        rag = RAG()
+        rag = RAG(agent_config)
         return rag(session_id, question)
 
 # run the flow
 
-
 def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
     logger.info("Running the flow for batch.")
+    
     with tracer.start_as_current_span("batch::evaluation::runflow") as span:
         pf = PFClient()
         try:
@@ -48,8 +59,8 @@ def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
                     "context": "${data.context}",
                 },
                 model_config=configure_aoai_env(),
-                tags={"run_configuraton": load_agent_configuration(
-                    "agents/rag", "rag_agent_config.yaml")},
+                tags={"run_configuraton": GLOBAL_AGENT_CONFIG},
+                environment_variables={"GLOBAL_AGENT_CONFIG": json.dumps(GLOBAL_AGENT_CONFIG)},
                 stream=True,  # To see the running progress of the flow in the console
             )
         except Exception as e:
@@ -71,6 +82,7 @@ def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
 
 
 def run_and_eval_flow(dump_output: bool = False):
+     
     with tracer.start_as_current_span("batch::evaluation::run_and_eval_flow") as span:
         # Load the batch output from runflow
         base_run, batch_output = runflow(dump_output=dump_output)
@@ -97,4 +109,6 @@ def run_and_eval_flow(dump_output: bool = False):
 
 
 if __name__ == "__main__":
+    GLOBAL_AGENT_CONFIG = load_agent_configuration("agents/rag", "rag_agent_config.yaml")
+    logger.info(f"GLOBAL_AGENT_CONFIG = {GLOBAL_AGENT_CONFIG}")
     run_and_eval_flow(dump_output=True)

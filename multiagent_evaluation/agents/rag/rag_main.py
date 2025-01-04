@@ -31,14 +31,16 @@ start_trace()
 
 class RAG:
 
-    def __init__(self) -> None:
+    def __init__(self, rag_config:dict = None) -> None:
 
         logger.info("RAG.Initializing RAG")
         try:
-            # load configuration from variant yaml
-            rag_config = load_agent_configuration(
-                "agents/rag", "rag_agent_config.yaml")
-            logger.info(f"rag_config = {rag_config}")
+            if rag_config is None:
+                # load configuration from default variant yaml in the agents/rag folder
+                logger.info("RAG.__init__#rag_config is empty, loading default configuration")
+                rag_config = load_agent_configuration("agents/rag", "rag_agent_config.yaml")
+                
+            logger.info(f"__init__.rag_config = {rag_config}")
             self.api_key = os.getenv("AZURE_OPENAI_KEY")
             # check if ragConfig is not None - throw exception
             if rag_config is None or self.api_key is None:

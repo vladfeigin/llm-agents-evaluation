@@ -37,5 +37,11 @@
             "type": "string",
             "default": " "
         }
+    },
+    "init": {
+        "rag_config": {
+            "type": "object",
+            "default": ""
+        }
     }
 }
