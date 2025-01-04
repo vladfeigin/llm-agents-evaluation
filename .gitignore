@@ -34,3 +34,5 @@ eval_results*.json
 multiagent_evaluation/evaluation\[deprecated]/__pycache__/
 
 multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
+app.log
+batch_flow_output.txt
