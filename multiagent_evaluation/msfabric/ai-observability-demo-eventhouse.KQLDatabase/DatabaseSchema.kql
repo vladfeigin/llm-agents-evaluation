@@ -17,6 +17,7 @@
 .create-merge table ApplicationDetails (EventTime:datetime, OperationId:guid, ParentId:string, ApplicationName:string, ApplicationVersion:string, SessionId:string, ConfigVersion:string, Deployment:string) 
 .create-merge table ApplicationUsage (EventTime:datetime, OperationId:guid, ParentId:string, ApplicationName:string, ApplicationVersion:string, SessionId:string, ConfigVersion:string, Duration:int, Success:string, Prompt:dynamic, Output:dynamic, TotalTokens:int, PromptTokens:int, CompletionTokens:int, ModelName:string, Deployment:string) 
 .create-merge table EvaluationRaw (EventTime:datetime, OperationId:guid, ParentId:string, SessionId:string, Question:string, GroundTruth:string, Context:string, ModelAnswer:string, Relevance:long, Groundedness:long, Similarity:long, Coherence:long, EvaluationDataSet:string, EvaluationPortalUrl:string) 
+.create-merge table SearchDetails (EventTime:datetime, OperationId:guid, ParentId:string, DurationMs:int, SearchInput:dynamic, SearchOutput:dynamic) 
 .create-or-alter function with (skipvalidation = "true") EvaluationFlowInsert() {
      let AppTracesTbl = 
         opentel_traces
@@ -293,7 +294,26 @@
         | extend ConfigVersion = tostring(records.Properties.config_version)
         | extend Deployment = tostring(records.Properties.endpoint)
         | project EventTime, OperationId, ParentId, ApplicationName, ApplicationVersion, SessionId, ConfigVersion, Deployment}
+.create-or-alter function with (skipvalidation = "true") SearchDetailsInsert() {   
+        let search_details_table=
+        opentel_traces
+        | mv-expand records 
+        | where records.Target == 'retrieve_documents.task'
+        | where records.Type == 'AppDependencies';
+        search_details_table
+        | project
+            EventTime = todatetime((records)["time"]),
+            OperationId = toguid(records.OperationId),
+            ParentId = tostring(records.ParentId),
+            records
+        | extend properties = records.Properties
+        | extend DurationMs = toint(records.DurationMs)
+        | extend SearchInput = properties.['traceloop.entity.input']
+        | extend SearchOutput = properties.['traceloop.entity.output']
+        | project EventTime, OperationId, ParentId, DurationMs, SearchInput, SearchOutput
+      }
 .alter table EvaluationMetrics policy update "[{\"IsEnabled\":true,\"Source\":\"traces\",\"Query\":\"EvaluationMetricsFlowInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
 .alter table OngoingUsage policy update "[{\"IsEnabled\":true,\"Source\":\"opentel_traces\",\"Query\":\"OngoingUsageInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
 .alter table ApplicationDetails policy update "[{\"IsEnabled\":true,\"Source\":\"opentel_traces\",\"Query\":\"ApplicationDetailsInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
 .alter table EvaluationRaw policy update "[{\"IsEnabled\":true,\"Source\":\"opentel_traces\",\"Query\":\"EvaluationRawFlowInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+.alter table SearchDetails policy update "[{\"IsEnabled\":true,\"Source\":\"opentel_traces\",\"Query\":\"SearchDetailsInsert()\",\"IsTransactional\":true,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
