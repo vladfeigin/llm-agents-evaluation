@@ -230,11 +230,11 @@ After ingestion, open Azure AI Search and verify the new index is created correc
 
 #### Running RAG Agent locally
 
-1. Change the directory to the project root folder: `multiagent_evaluation` folder.
-2. In `./agents/rag/rag_agent_config.yaml`, change the search index name to the newly created index name from the previous step.
+1. Change the directory to the project root folder.
+2. In `./multiagent_evaluation/agents/rag/rag_agent_config.yaml`, change the search index name to the newly created index name from the previous step.
 3. From the command line, run:
     ```sh
-    pf flow serve --source ./agents/rag/ --port 8080 --host localhost
+    pf flow serve --source ./multiagent_evaluation/agents/rag/ --port 8080 --host localhost
     ```
     This will open a chat web interface. Now you can ask questions about the ingested documents.
 
@@ -255,9 +255,9 @@ After ingestion, open Azure AI Search and verify the new index is created correc
 
 #### Running RAG Agent evaluation
 1. Replace the `./rag/data.json` file with your relevant dataset. This dataset is for RAG Agent evaluation.
-2. Once you have created a relevant dataset, execute the command from the command line:
+2. Once you have created a relevant dataset, **from the project root folder**, execute the command from the command line:
     ```sh
-    python -m ./rag_evaluation/runflow_local
+    python -m multiagent_evaluation.agents.rag.evaluation.evaluate
     ```
 Open Microsoft Fabric Real-Time dashboard. Select Evaluation Page and see the evaluation results.
 

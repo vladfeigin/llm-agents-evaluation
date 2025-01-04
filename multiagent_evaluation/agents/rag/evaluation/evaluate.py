@@ -6,16 +6,16 @@ from typing import Tuple
 from promptflow.client import PFClient
 from promptflow.entities import Run
 from promptflow.tracing import start_trace
-from agents.rag.rag_main import RAG
-from evaluation.evalflow import eval_batch
-from utils.utils import configure_logging, configure_tracing, configure_aoai_env, load_agent_configuration
+from multiagent_evaluation.agents.rag.rag_main import RAG
+from multiagent_evaluation.agents.rag.evaluation.evaluation_implementation import eval_batch
+from multiagent_evaluation.utils.utils import configure_logging, configure_tracing, configure_aoai_env, load_agent_configuration
 
 tracing_collection_name = "rag_llmops"
 # Configure logging and tracing
 logger = configure_logging()
 tracer = configure_tracing(collection_name=tracing_collection_name)
 
-data = "./agents/rag/data.jsonl"  # Path to the data file for batch evaluation
+data = "./multiagent_evaluation/agents/rag/evaluation/data.jsonl"  # Path to the data file for batch evaluation
 
 # this function is used to run the RAG flow for batch evaluation
 
