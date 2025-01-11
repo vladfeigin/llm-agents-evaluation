@@ -36,3 +36,15 @@ multiagent_evaluation/evaluation\[deprecated]/__pycache__/
 multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
 app.log
 batch_flow_output.txt
+
+multiagent_evaluation/agents/rag/evaluation/config.json
+batch_flow_output.txt
+config.json
+multiagent_evaluation/agents/rag/rag_agent_config_base.yaml
+
+multiagent_evaluation/agents/rag/evaluation/configurations/generated/*.yaml
+
+multiagent_evaluation/agents/rag/variants.json
+multiagent_evaluation/agents/rag/rag_agent_config.yaml
+
+multiagent_evaluation/agents/rag/rag_agent_config.yaml

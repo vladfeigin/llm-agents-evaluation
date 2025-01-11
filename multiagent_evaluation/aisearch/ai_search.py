@@ -128,7 +128,7 @@ class AISearch:
     # TODO - add as parameter the search type and the top_k here instead having them as fixed values
     def create_retriever(self, search_type: str, top_k=3) -> AzureAISearchRetriever:
         # Create retriever object
-        # supported search types: "semantic_hybrid", "similarity" (default) , "hybryd"
+        # supported search types: 'similarity', 'similarity_score_threshold', 'hybrid', 'hybrid_score_threshold', 'semantic_hybrid', 'semantic_hybrid_score_threshold'
         return self._vector_search.as_retriever(search_type=search_type, k=top_k)
 
     def ingest(self, documents: list, **kwargs) -> None:

@@ -1,0 +1,127 @@
+AgentConfiguration:
+  type: object
+  description: "Configuration settings for the AI agent."
+  properties:
+    agent_name:
+      type: string
+      description: "Unique name for this RAG Agent."
+    description:
+      type: string
+      description: "Short human-readable description of this RAG Agent."
+    config_version:
+      type: string
+      description: "Version string indicating which config format is used."
+    application_version:
+      type: string
+      description: "Version string for the overall application."
+    application_name:
+      type: string
+      description: "Name of the overall application."
+    deployment:
+      type: object
+      description: "Deployment details for the main model."
+      properties:
+        model_name:
+          type: string
+          description: "Internal reference name of the model."
+        model_version:
+          type: string
+          description: "Version of the model (e.g. '2024-08-01')."
+        name:
+          type: string
+          description: "Name of the model deployment."
+        endpoint:
+          type: string
+          description: "Full endpoint URL for the model deployment."
+        openai_api_version:
+          type: string
+          description: "API version string for the OpenAI deployment."
+      required:
+        - model_name
+        - model_version
+        - name
+        - endpoint
+        - openai_api_version
+    model_parameters:
+      type: object
+      description: "Model parameters such as temperature, seed, etc."
+      properties:
+        temperature:
+          type: number
+          description: "Floating-point value controlling the creativity (0.0 - 1.0)."
+        seed:
+          type: integer
+          description: "Random seed for reproducibility."
+      required:
+        - temperature
+        - seed
+    retrieval:
+      type: object
+      description: "Configuration for the retrieval process."
+      properties:
+        parameters:
+          type: object
+          description: "Retrieval parameters and settings."
+          properties:
+            search_type:
+              type: string
+              description: "Search strategy (e.g. 'hybrid', 'semantic')."
+            top_k:
+              type: integer
+              description: "Number of documents to retrieve."
+            index_name:
+              type: string
+              description: "Name of the search/index to query."
+            index_semantic_configuration_name:
+              type: string
+              description: "Semantic configuration name within the index."
+          required:
+            - search_type
+            - top_k
+            - index_name
+            - index_semantic_configuration_name
+        deployment:
+          type: object
+          description: "Deployment details for the retrieval model."
+          properties:
+            model_name:
+              type: string
+              description: "Name of the model used for embeddings."
+            name:
+              type: string
+              description: "Deployment name of the embedding model."
+            endpoint:
+              type: string
+              description: "Endpoint URL for the embedding model."
+            openai_api_version:
+              type: string
+              description: "API version of the embedding model deployment."
+          required:
+            - model_name
+            - name
+            - endpoint
+            - openai_api_version
+      required:
+        - parameters
+        - deployment
+    intent_system_prompt:
+      type: string
+      description: "System prompt for reformulating user intent."
+    chat_system_prompt:
+      type: string
+      description: "System prompt for the chat chain."
+    human_template:
+      type: string
+      description: "Template for how user messages are formatted."
+  required:
+    - agent_name
+    - description
+    - config_version
+    - application_version
+    - application_name
+    - deployment
+    - model_parameters
+    - retrieval
+    - intent_system_prompt
+    - chat_system_prompt
+    - human_template

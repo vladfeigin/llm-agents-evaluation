@@ -1,0 +1,90 @@
+{
+     
+        "deployment": [
+            {
+                "name": "gpt-4o-mini",
+                "model_name": "gpt-4o-mini",
+                "model_version": "2024-08-01",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            },
+            {
+                "name": "gpt-4o-3",
+                "model_name": "gpt-4o",
+                "model_version": "2024-08-01",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            },
+            {
+                "name": "gpt-4o-2",
+                "model_name": "gpt-4o",
+                "model_version": "2024-05-13",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-4o-2/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            },
+            {
+                "name": "gpt-35-turbo-0301",
+                "model_name": "gpt-35-turbo",
+                "model_version": "0301",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-35-turbo-0301/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            }
+        ],
+        "model_parameters": [
+            {
+                "name": "temperature",
+                "range": [0.0, 1.0],
+                "step": 0.5,
+                "default": 0.0,
+                "active": "true"
+            },
+            {
+                "name": "top_p",
+                "range": [0.1, 0.9],
+                "step": 0.5,
+                "default": 0.9,
+                "active": false
+            },
+            {
+                "name": "frequency_penalty",
+                "range": [0.0, 1.0],
+                "step": 0.5,
+                "default": 0.0,
+                "active": false
+            },
+            {
+                "name": "presence_penalty",
+                "range": [0.0, 1.0],
+                "step": 0.5,
+                "default": 0.0,
+                "active": false
+            }
+        ],
+        "retrieval": {
+            "parameters": [
+                {
+                    "name": "search_type",
+                    "set": ["hybrid", "similarity"],
+                    "default": "hybrid"
+                },
+                {
+                    "name": "top_k",
+                    "range": [3, 5],
+                    "step": 2,
+                    "default": 5
+                }
+            ],
+            "deployment": [
+                {
+                    "model_name": "text-embedding-ada-002",
+                    "model_version": "2024-08-01",
+                    "openai_api_version": "2024-10-01-preview",
+                    "name": "text-embedding-ada-002",
+                    "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15"
+                }
+            ]
+        },
+        "intent_system_prompt": "Your task is to extract the user’s intent by reformulating their latest question into a standalone query that is understandable without prior chat history. Analyze the conversation to identify any contextual references in the latest question, and incorporate necessary details to make it self-contained. Ensure the reformulated question preserves the original intent. Do not provide an answer; only return the reformulated question. For example, if the latest question is ‘What about its pricing?’ and the chat history discusses Microsoft Azure, reformulate it to ‘What is the pricing of Microsoft Azure?’",
+        "chat_system_prompt": "You are a knowledgeable assistant specializing only in technology domain. Deliver concise and clear answers, emphasizing the main points of the user’s query. Your responses should be based exclusively on the context provided in the prompt; do not incorporate external knowledge. If the provided context is insufficient to answer the question, request additional information.\n\n<context>\n{context}\n</context>",
+        "human_template": "question: {input}"
+}
