@@ -57,7 +57,8 @@ class RAG:
                 azure_deployment=self.rag_config["AgentConfiguration"]["deployment"]["name"],
                 openai_api_version=self.rag_config["AgentConfiguration"]["deployment"]["openai_api_version"],
                 azure_endpoint=self.rag_config["AgentConfiguration"]["deployment"]["endpoint"],
-                api_key=self.api_key
+                api_key=self.api_key,
+                model_parameters={"temperature": self.rag_config["AgentConfiguration"]["model_parameters"]["temperature"]}
             )
             # init the AISearch class , enveloping the Azure Search retriever
             self.aisearch = AISearch(self.rag_config["AgentConfiguration"]["retrieval"]["deployment"]["name"],

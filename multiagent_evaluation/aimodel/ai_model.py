@@ -21,8 +21,9 @@ tracer = configure_tracing(__file__)
 
 # Wrapper class for LLM Open AI model
 class AIModel:
-    def __init__(self, azure_deployment, openai_api_version, azure_endpoint, api_key) -> None:
+    def __init__(self, azure_deployment, openai_api_version, azure_endpoint, api_key, model_parameters: dict) -> None:
         logger.info("AIModel.Initializing AIModel")
+        logger.info(f"AIModel.Initializing:model_parameters = {model_parameters}")
 
         # TODO add try catch block to catch the exception
 
@@ -32,7 +33,7 @@ class AIModel:
                 openai_api_version=openai_api_version,
                 azure_endpoint=azure_endpoint,
                 api_key=api_key,
-                temperature=0
+                temperature=model_parameters.get("temperature", 0),
             )
 
     def llm(self) -> AzureChatOpenAI:
@@ -52,4 +53,4 @@ if __name__ == "__main__":
     api_key = os.getenv("AZURE_OPENAI_KEY")
 
     llm = AIModel(azure_deployment, openai_api_version,
-                  azure_endpoint, api_key)
+                  azure_endpoint, api_key, {"temperature": 0.5})

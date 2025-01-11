@@ -90,9 +90,13 @@ def runflow(agent_config, dump_output: bool = False) -> Tuple[Run, pd.DataFrame]
         details = pf.get_details(base_run)
         # if dump_to_output True, save the details to the local file called: batch_flow_output_<timestamp>.txt
         # file name must contain a current timestamp
+        # Remove the columns that are not needed
+        details = details.drop(columns=['inputs.line_number'], errors='ignore')
+        details = details.drop(columns=['inputs.session_id'], errors='ignore')
+    
         if dump_output:
             # timestamp = pd.Timestamp.now().strftime("%Y%m%d%H%M%S")
-            details.to_csv(f"batch_flow_output.txt", index=False)
+            details.to_json(f"batch_flow_output.json", index=False)
 
         return base_run, details
 
@@ -138,11 +142,11 @@ def process_config(file: str, dump_output: bool = False):
 # From the root project run : python -m multiagent_evaluation.agents.rag.evaluation.evaluate
 ##------------------------------------------------------------------------------------------
 
-"""
+
 #----------------------------------------------------------------------------------------------------------------------------
 # Multi variant run: running multiple batches of dataset, each with diferent parameters to find best performing configuration
 #----------------------------------------------------------------------------------------------------------------------------
-
+"""
 def main():
 
     # init aoai global parameters
@@ -165,8 +169,8 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 """
+
 #-------------------------------------------------------------------------------------------
 #Single variant run  
 #-------------------------------------------------------------------------------------------
@@ -176,5 +180,5 @@ if __name__ == "__main__":
     logger.info(f"GLOBAL_AGENT_CONFIG = {agent_config}")
     print(f"GLOBAL_AGENT_CONFIG = {agent_config}")
     run_and_eval_flow(agent_config, dump_output=True)
-    
+  
 
