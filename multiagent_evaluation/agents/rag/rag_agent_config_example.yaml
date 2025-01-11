@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../schemas/agent_config_schema.yaml
+# yaml-language-server: $schema=../schemas/agent_config_schema.yaml
 AgentConfiguration:
   agent_name: rag_agent
   description: RAG Agent configuration

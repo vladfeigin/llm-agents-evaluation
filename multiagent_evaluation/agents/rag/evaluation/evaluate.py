@@ -134,9 +134,14 @@ def process_config(file: str, dump_output: bool = False):
     run_and_eval_flow(agent_config, dump_output=dump_output)
 
 
+##------------------------------------------------------------------------------------------
+# From the root project run : python -m multiagent_evaluation.agents.rag.evaluation.evaluate
+##------------------------------------------------------------------------------------------
 
 """
-#///////////////////////////  MAIN FUNCTION . Multi variant run  ///////////////////////////
+#----------------------------------------------------------------------------------------------------------------------------
+# Multi variant run: running multiple batches of dataset, each with diferent parameters to find best performing configuration
+#----------------------------------------------------------------------------------------------------------------------------
 
 def main():
 
@@ -158,13 +163,13 @@ def main():
             except Exception as e:
                 logger.error(f"Error processing {file}: {e}")
 
-
 if __name__ == "__main__":
     main()
 
 """
-
-#///////////////////////////  MAIN FUNCTION . Single variant run  ///////////////////////////
+#-------------------------------------------------------------------------------------------
+#Single variant run  
+#-------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     
     agent_config = load_agent_configuration("agents/rag", "rag_agent_config.yaml")

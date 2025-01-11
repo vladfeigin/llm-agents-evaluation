@@ -47,4 +47,4 @@ multiagent_evaluation/agents/rag/evaluation/configurations/generated/*.yaml
 multiagent_evaluation/agents/rag/variants.json
 multiagent_evaluation/agents/rag/rag_agent_config.yaml
 
-multiagent_evaluation/agents/rag/rag_agent_config.yaml
+
