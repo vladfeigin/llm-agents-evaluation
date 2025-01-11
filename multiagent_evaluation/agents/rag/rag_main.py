@@ -4,6 +4,7 @@
 # create RAG class
 
 import os
+import json
 # initialize all environment variables from .env file
 #from opentelemetry import trace
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -34,6 +35,8 @@ class RAG:
     def __init__(self, rag_config:dict = None) -> None:
 
         logger.info("RAG.Initializing RAG")
+        logger.info(f"RAG.__init__#agent_config = {rag_config}")
+        rag_config =json.loads(rag_config)
         try:
             if rag_config is None:
                 # load configuration from default variant yaml in the agents/rag folder
@@ -51,16 +54,16 @@ class RAG:
 
             # init the AIModel class enveloping a LLM model
             self.aimodel = AIModel(
-                azure_deployment=self.rag_config["AgentConfiguration"]["model_deployment"],
-                openai_api_version=self.rag_config["AgentConfiguration"]["openai_api_version"],
-                azure_endpoint=self.rag_config["AgentConfiguration"]["model_deployment_endpoint"],
+                azure_deployment=self.rag_config["AgentConfiguration"]["deployment"]["name"],
+                openai_api_version=self.rag_config["AgentConfiguration"]["deployment"]["openai_api_version"],
+                azure_endpoint=self.rag_config["AgentConfiguration"]["deployment"]["endpoint"],
                 api_key=self.api_key
             )
             # init the AISearch class , enveloping the Azure Search retriever
-            self.aisearch = AISearch(self.rag_config["AgentConfiguration"]["retrieval"]["embedding_deployment"],
-                                     self.rag_config["AgentConfiguration"]["retrieval"]["embedding_endpoint"],
-                                     self.rag_config["AgentConfiguration"]["retrieval"]["index_name"],
-                                     self.rag_config["AgentConfiguration"]["retrieval"]["index_semantic_configuration_name"])
+            self.aisearch = AISearch(self.rag_config["AgentConfiguration"]["retrieval"]["deployment"]["name"],
+                                     self.rag_config["AgentConfiguration"]["retrieval"]["deployment"]["endpoint"],
+                                     self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["index_name"],
+                                     self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["index_semantic_configuration_name"])
 
             # initiate the session store
             self._session_store = SimpleInMemorySessionStore()
@@ -86,8 +89,8 @@ class RAG:
             self._history_aware_user_intent_retriever = \
                 create_history_aware_retriever(self.aimodel.llm(),
                                                self.aisearch.create_retriever(
-                    self.rag_config["AgentConfiguration"]["retrieval"]["search_type"],
-                    self.rag_config["AgentConfiguration"]["retrieval"]["top_k"]),
+                    self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["search_type"],
+                    self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["top_k"]),
                     self._user_intent_prompt_template
                 )
 
@@ -163,7 +166,7 @@ class RAG:
                 span.set_attribute(
                     "config_version", self.rag_config["AgentConfiguration"]["config_version"])
                 span.set_attribute(
-                    "endpoint", self.rag_config["AgentConfiguration"]["model_deployment_endpoint"])
+                    "endpoint", self.rag_config["AgentConfiguration"]["deployment"]["endpoint"])
 
                 response = self._conversational_rag_chain.invoke({"input": question},
                                                                  config={"configurable": {

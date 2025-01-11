@@ -2,52 +2,68 @@
 import os
 import pandas as pd
 import json
+from multiprocessing import Process
+from threading import Thread
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
 from typing import Tuple
 from promptflow.client import PFClient
+# from promptflow.azure import PFClient
+# from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
+
 from promptflow.entities import Run
 from promptflow.tracing import start_trace
 from multiagent_evaluation.agents.rag.rag_main import RAG
 from multiagent_evaluation.agents.rag.evaluation.evaluation_implementation import eval_batch
 from multiagent_evaluation.utils.utils import configure_logging, configure_tracing, configure_aoai_env, load_agent_configuration
 
+
 tracing_collection_name = "rag_llmops"
 # Configure logging and tracing
 logger = configure_logging()
 tracer = configure_tracing(collection_name=tracing_collection_name)
 
-data = "./multiagent_evaluation/agents/rag/evaluation/data.jsonl"  # Path to the data file for batch evaluation
+# Path to the data file for batch evaluation
+data = "./multiagent_evaluation/agents/rag/evaluation/data.jsonl"
 GLOBAL_AGENT_CONFIG = None
 
 # this function is used to run the RAG flow for batch evaluation
 
 start_trace()
 
-#spawn in a dedicated process to run the RAG flow
-def rag_flow( session_id: str= " ", question: str = " ") -> str:
-    
-    # Read the environment variable, which will be a JSON string
-    agent_config_str = os.getenv("GLOBAL_AGENT_CONFIG", "")
-    if agent_config_str:
-        agent_config = json.loads(agent_config_str)
-    else:
-        agent_config = {}
+""" 
+def init():
+    try:
+        credential = DefaultAzureCredential()
+        # Check if given credential can get token successfully.
+        credential.get_token("https://management.azure.com/.default")
+    except Exception as ex:
+        # Fall back to InteractiveBrowserCredential in case DefaultAzureCredential does not work
+        credential = InteractiveBrowserCredential()
+    return credential
+"""
 
-    logger.info(f"rag_flow:agent_config = {agent_config}")
-    
+# spawn in a dedicated process to run the RAG flow
+"""
+def rag_flow(session_id: str = " ", question: str = " ") -> str:
+
     with tracer.start_as_current_span("flow::evaluation::rag_flow") as span:
-        rag = RAG(agent_config)
+        rag = RAG()
         return rag(session_id, question)
+"""
 
 # run the flow
 
-def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
+def runflow(agent_config, dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
     logger.info("Running the flow for batch.")
-    
+
     with tracer.start_as_current_span("batch::evaluation::runflow") as span:
-        pf = PFClient()
+        pf = PFClient(config={'trace.destination': "Local"})
+        # Connect to the workspace if Azure
+        # pf = PFClient.from_config(credential=credential)
         try:
             base_run = pf.run(
-                flow=rag_flow,
+                flow="multiagent_evaluation/agents/rag",   # rag_flow,
                 data=data,
                 description="Batch evaluation of the RAG application",
                 column_mapping={
@@ -59,8 +75,10 @@ def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
                     "context": "${data.context}",
                 },
                 model_config=configure_aoai_env(),
-                tags={"run_configuraton": GLOBAL_AGENT_CONFIG},
-                environment_variables={"GLOBAL_AGENT_CONFIG": json.dumps(GLOBAL_AGENT_CONFIG)},
+                tags={"run_configuraton": agent_config},
+                environment_variables={
+                    "aoai_config": json.dumps(GLOBAL_AGENT_CONFIG)},
+                init={"rag_config": json.dumps(agent_config)},
                 stream=True,  # To see the running progress of the flow in the console
             )
         except Exception as e:
@@ -81,11 +99,11 @@ def runflow(dump_output: bool = False) -> Tuple[Run, pd.DataFrame]:
 # the function which runs the batch flow and then evaluates the output
 
 
-def run_and_eval_flow(dump_output: bool = False):
-     
+def run_and_eval_flow(agent_config, dump_output: bool = False):
+
     with tracer.start_as_current_span("batch::evaluation::run_and_eval_flow") as span:
         # Load the batch output from runflow
-        base_run, batch_output = runflow(dump_output=dump_output)
+        base_run, batch_output = runflow(agent_config, dump_output=dump_output)
         eval_res, eval_metrics = eval_batch(
             batch_output, dump_output=dump_output)
 
@@ -108,7 +126,50 @@ def run_and_eval_flow(dump_output: bool = False):
         logger.info(">>>Batch evaluation flow completed successfully.")
 
 
+def process_config(file: str, dump_output: bool = False):
+    logger.info(f"Loading configuration from {file}")
+    agent_config = load_agent_configuration(
+        "agents/rag/evaluation/configurations/generated", file)
+    logger.info(f"agent_config = {agent_config}")
+    run_and_eval_flow(agent_config, dump_output=dump_output)
+
+
+
+"""
+#///////////////////////////  MAIN FUNCTION . Multi variant run  ///////////////////////////
+
+def main():
+
+    # init aoai global parameters
+    GLOBAL_AGENT_CONFIG = configure_aoai_env()
+
+    config_dir = "./multiagent_evaluation/agents/rag/evaluation/configurations/generated/"
+    files = [file for file in os.listdir(config_dir) if file.endswith(".yaml")]
+    print(f"files = {files}")
+
+    with ThreadPoolExecutor() as executor:
+        futures = {executor.submit(
+            process_config, file, False): file for file in files}
+        time.sleep(120)
+        for future in as_completed(futures):
+            file = futures[future]
+            try:
+                future.result()
+            except Exception as e:
+                logger.error(f"Error processing {file}: {e}")
+
+
 if __name__ == "__main__":
-    GLOBAL_AGENT_CONFIG = load_agent_configuration("agents/rag", "rag_agent_config.yaml")
-    logger.info(f"GLOBAL_AGENT_CONFIG = {GLOBAL_AGENT_CONFIG}")
-    run_and_eval_flow(dump_output=True)
+    main()
+
+"""
+
+#///////////////////////////  MAIN FUNCTION . Single variant run  ///////////////////////////
+if __name__ == "__main__":
+    
+    agent_config = load_agent_configuration("agents/rag", "rag_agent_config.yaml")
+    logger.info(f"GLOBAL_AGENT_CONFIG = {agent_config}")
+    print(f"GLOBAL_AGENT_CONFIG = {agent_config}")
+    run_and_eval_flow(agent_config, dump_output=True)
+    
+
