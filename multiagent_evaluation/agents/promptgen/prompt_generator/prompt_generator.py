@@ -20,17 +20,17 @@ tracer = configure_tracing(__file__)
 
 start_trace()
 
-class PromptEvaluator:
+class PromptGenerator:
 
     def __init__(self, agent_config:dict = None) -> None:
 
-        logger.info("PromptEvaluator.Initializing PromptEvaluator")
+        logger.info("PromptGenerator.Initializing PromptEvaluator")
         
         try:
             if agent_config is None:
                 # load configuration from default variant yaml 
-                logger.info("PromptEvaluator.__init__#agent_config is empty, loading default configuration")
-                agent_config = load_agent_configuration("agents/promptgen/prompt_evaluator", "prompt_evaluator_config.yaml")
+                logger.info("PromptGenerator.__init__#agent_config is empty, loading default configuration")
+                agent_config = load_agent_configuration("agents/promptgen/prompt_generator", "prompt_generator_config.yaml")
             else:
                 agent_config =json.loads(agent_config)
                 
@@ -52,31 +52,30 @@ class PromptEvaluator:
                 api_key=self.api_key,
                 model_parameters={"temperature": self.agent_config["AgentConfiguration"]["model_parameters"]["temperature"]}
             )
-            
         except Exception as e:
             logger.error(f"PromptEvaluator.__init__#exception= {e}")
             raise e
 
-    def __call__(self, prompt:str, input:str) -> str:
-        logger.info("PromptEvaluator.__call__#PromptEvaluator is called")
-        return self.evaluate_prompt(prompt, input)
+    def __call__(self, prompt:str, evaluation_dataset:str, evaluation_scores:str) -> str:
+        logger.info("PromptGenerator.__call__#PromptGenerator is called")
+        return self.generate_prompts(prompt, evaluation_dataset, evaluation_scores)
     
-    def evaluate_prompt(self, prompt:str, input:str) -> str:
-        logger.info("PromptEvaluator.evaluate_prompt#Evaluating prompt")
+    def generate_prompts(self, prompt:str, evaluation_dataset:str, evaluation_scores:str) -> str:
+        logger.info("PromptGenerator.generate_prompts#Evaluating prompt")
         prompt_template = PromptTemplate.from_template(self.agent_config["AgentConfiguration"]["system_prompt"])
         #prompt = prompt_template.format(prompt=prompt, input=input)
         #logger.info(f"PromptEvaluator.evaluate_prompt#prompt = {prompt}")
         chain = prompt_template | self.aimodel.llm() | StrOutputParser()
-        return chain.invoke({"input": input, "prompt": prompt})
+        return chain.invoke({"evaluation_dataset": evaluation_dataset, "prompt": prompt, "evaluation_scores":evaluation_scores})
         
     
         
 # To run locally from project root directory: python -m multiagent_evaluation.agents.promptgen.prompt_evaluator.prompt_evaluator    
 if __name__ == "__main__":
 
-    prompt_evaluator = PromptEvaluator()
-    result = prompt_evaluator(prompt="You are a domain-specific technology assistant. When you answer, you must verify that each point you include is explicitly stated in the context. 1.	Read the user’s question. 2.	Check the context for matching information. 3.	Answer solely using details found in the context. 4.	If you cannot find information in the context, politely ask for more details.", \
-        input="""{{
+    prompt_generator = PromptGenerator()
+    result = prompt_generator(prompt="You are a domain-specific technology assistant. When you answer, you must verify that each point you include is explicitly stated in the context. 1.	Read the user’s question. 2.	Check the context for matching information. 3.	Answer solely using details found in the context. 4.	If you cannot find information in the context, politely ask for more details.", \
+        evaluation_dataset="""{{
     "question": {{
         "0": "What's Microsoft Fabric?",
         "1": "What is OneLake in Microsoft Fabric?",
@@ -104,6 +103,27 @@ if __name__ == "__main__":
         "2": "The core services in Microsoft Fabric include Data Factory, Data Engineering, Data Warehouse, Data Science, Real-Time Analytics, Power BI, and Data Activator. These services are integrated into a unified SaaS foundation.",
         "3": "Microsoft Fabric simplifies analytics by providing a unified, end-to-end platform that integrates various components needed for data processing and analysis. It eliminates the need to assemble different services from multiple vendors by offering a cohesive suite that includes Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. This integration allows for seamless data movement, processing, ingestion, transformation, and report building. Additionally, Fabric provides a centralized data storage solution with OneLake and embeds AI capabilities, reducing the need for manual integration and enabling easy transition from raw data to actionable insights.",
         "4": "AI is seamlessly embedded within Microsoft Fabric, eliminating the need for manual integration. It is a foundational part of the platform, accelerating the data journey and enabling tasks such as data transformation and insight generation. AI capabilities are integrated across various components like Data Engineering, Data Factory, Data Science, and more, enhancing productivity and simplifying analytics processes."
+    }}
+    }}""", evaluation_scores=""" {{
+    "0": {{
+        "score": 5,
+        "reason": "The output accurately reflects the context provided. It describes Microsoft Fabric as an end-to-end analytics and data platform designed for enterprises needing a unified solution. It includes details about data movement, processing, ingestion, transformation, real-time event routing, report building, and the comprehensive suite of services offered. The SaaS model and the integration of AI capabilities and OneLake for centralizing data storage are also mentioned, aligning well with the context."
+    }},
+    "1": {{
+        "score": 4,
+        "reason": "The output is mostly consistent with the context and expected answer, accurately describing OneLake as a unified storage system built on ADLS Gen2 and providing a single SaaS experience. It mentions eliminating data silos and simplifying data management, as well as easy data discovery and policy enforcement. However, it adds details about a hierarchical structure and the ability to create multiple workspaces and lakehouses, which are not explicitly stated in the context."
+    }},
+    "2": {{
+        "score": 3,
+        "reason": "The output correctly identifies several core services of Microsoft Fabric, such as Data Factory, Data Engineering, Data Warehouse, Data Science, Real-Time Analytics, and Power BI. However, it incorrectly includes 'Data Activator,' which is not mentioned in the context. The expected answer also includes 'Databases,' which is missing in the output. Therefore, the output partially aligns with the context but includes some inaccuracies."
+    }},
+    "3": {{
+        "score": 5,
+        "reason": "The output aligns well with the context and expected answer. It correctly describes how Microsoft Fabric simplifies analytics by providing a unified platform that integrates various components and services. The description includes data movement, processing, ingestion, transformation, report building, centralized data storage with OneLake, and embedded AI capabilities. This is consistent with the context and expected answer."
+    }},
+    "4": {{
+        "score": 4,
+        "reason": "The output accurately reflects the context by stating that AI is seamlessly embedded within Microsoft Fabric, eliminating the need for manual integration. It mentions that AI accelerates the data journey and enables tasks such as data transformation and insight generation, which aligns with the context. However, it adds that AI capabilities are integrated across various components like Data Engineering, Data Factory, and Data Science, which are not explicitly detailed in the context."
     }}
 }}"""
  )

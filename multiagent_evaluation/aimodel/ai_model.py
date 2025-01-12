@@ -32,7 +32,7 @@ class AIModel:
                 openai_api_version=openai_api_version,
                 azure_endpoint=azure_endpoint,
                 api_key=api_key,
-                temperature=model_parameters.temperature if model_parameters.temperature else 0,
+                temperature=model_parameters.get("temperature", 0),
             )
 
     def llm(self) -> AzureChatOpenAI:
