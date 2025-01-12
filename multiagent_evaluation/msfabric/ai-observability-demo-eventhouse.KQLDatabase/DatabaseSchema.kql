@@ -237,7 +237,7 @@
     | where Message has "batch-evaluation-flow-raw"
     | extend parsed_json = parse_json(Message)
     | mv-expand result = parsed_json.result
-    | where result contains "inputs.session_id"
+    | where result contains "inputs.question"
     | extend 
         SessionId = tostring(result["inputs.session_id"]),
         Question = tostring(result["inputs.question"]),
