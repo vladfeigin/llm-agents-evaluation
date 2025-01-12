@@ -35,13 +35,16 @@ class RAG:
     def __init__(self, rag_config:dict = None) -> None:
 
         logger.info("RAG.Initializing RAG")
-        logger.info(f"RAG.__init__#agent_config = {rag_config}")
-        rag_config =json.loads(rag_config)
+        
         try:
             if rag_config is None:
                 # load configuration from default variant yaml in the agents/rag folder
                 logger.info("RAG.__init__#rag_config is empty, loading default configuration")
                 rag_config = load_agent_configuration("agents/rag", "rag_agent_config.yaml")
+            else:
+                rag_config =json.loads(rag_config)
+            
+            logger.info(f"RAG.__init__#agent_config = {rag_config}")
                 
             logger.info(f"__init__.rag_config = {rag_config}")
             self.api_key = os.getenv("AZURE_OPENAI_KEY")
