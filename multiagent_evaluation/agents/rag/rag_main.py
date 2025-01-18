@@ -3,10 +3,14 @@
 # it leverages AIModule class and aisearch module to search for the answer
 # create RAG class
 
+from multiagent_evaluation.aisearch.ai_search import AISearch
+from multiagent_evaluation.aimodel.ai_model import AIModel
+from multiagent_evaluation.session_store.session_store import SimpleInMemorySessionStore
+from multiagent_evaluation.utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
 import os
 import json
 # initialize all environment variables from .env file
-#from opentelemetry import trace
+from opentelemetry import trace
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
@@ -14,120 +18,116 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
-from promptflow.tracing import start_trace
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from multiagent_evaluation.utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
-from multiagent_evaluation.session_store.session_store import SimpleInMemorySessionStore
-from multiagent_evaluation.aimodel.ai_model import AIModel
-from multiagent_evaluation.aisearch.ai_search import AISearch
 
 # Configure tracing and logging
 logger = configure_logging()
 tracer = configure_tracing(__file__)
 
-start_trace()
 
 class RAG:
 
-    def __init__(self, rag_config:dict = None) -> None:
+    def __init__(self, rag_config: dict = None) -> None:
 
         logger.info("RAG.Initializing RAG")
-        
-        try:
-            if rag_config is None:
-                # load configuration from default variant yaml in the agents/rag folder
-                logger.info("RAG.__init__#rag_config is empty, loading default configuration")
-                rag_config = load_agent_configuration("agents/rag", "rag_agent_config.yaml")
-            else:
-                rag_config =json.loads(rag_config)
-                
-            logger.info(f"__init__.rag_config = {rag_config}")
-            
-            self.api_key = os.getenv("AZURE_OPENAI_KEY")
-            # check if ragConfig is not None - throw exception
-            if rag_config is None or self.api_key is None:
-                logger.error("agent config and api_key are required")
-                raise ValueError("agent config and api_key are required")
+        with tracer.start_as_current_span("RAG.__init__span") as span:
+            try:
+                if rag_config is None:
+                    # load configuration from default variant yaml in the agents/rag folder
+                    logger.info(
+                        "RAG.__init__#rag_config is empty, loading default configuration")
+                    rag_config = load_agent_configuration(
+                        "agents/rag", "rag_agent_config.yaml")
 
-            self.rag_config = rag_config
+                logger.info(f"RAG.__init__#agent_config = {rag_config}")
+                span.set_attribute("agent config", rag_config)
 
-            # init the AIModel class enveloping a LLM model
-            self.aimodel = AIModel(
-                azure_deployment=self.rag_config["AgentConfiguration"]["deployment"]["name"],
-                openai_api_version=self.rag_config["AgentConfiguration"]["deployment"]["openai_api_version"],
-                azure_endpoint=self.rag_config["AgentConfiguration"]["deployment"]["endpoint"],
-                api_key=self.api_key,
-                model_parameters={"temperature": self.rag_config["AgentConfiguration"]["model_parameters"]["temperature"]}
-            )
-            # init the AISearch class , enveloping the Azure Search retriever
-            self.aisearch = AISearch(self.rag_config["AgentConfiguration"]["retrieval"]["deployment"]["name"],
-                                     self.rag_config["AgentConfiguration"]["retrieval"]["deployment"]["endpoint"],
-                                     self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["index_name"],
-                                     self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["index_semantic_configuration_name"])
+                self.api_key = os.getenv("AZURE_OPENAI_KEY")
+                # check if ragConfig is not None - throw exception
+                if rag_config is None or self.api_key is None:
+                    logger.error("agent config and api_key are required")
+                    raise ValueError("agent config and api_key are required")
 
-            # initiate the session store
-            self._session_store = SimpleInMemorySessionStore()
+                self.rag_config = rag_config
 
-            # create a prompt template for user intent
-            # user intent is concluded from a chat history and the current user question
-            self._user_intent_prompt_template = ChatPromptTemplate.from_messages(
-                [
-                    ("system",
-                     self.rag_config["AgentConfiguration"]["intent_system_prompt"]),
-                    MessagesPlaceholder("chat_history"),
-                    ("human", "{input}"),
+                # init the AIModel class enveloping a LLM model
+                self.aimodel = AIModel(
+                    azure_deployment=self.rag_config["AgentConfiguration"]["deployment"]["name"],
+                    openai_api_version=self.rag_config["AgentConfiguration"]["deployment"]["openai_api_version"],
+                    azure_endpoint=self.rag_config["AgentConfiguration"]["deployment"]["endpoint"],
+                    api_key=self.api_key,
+                    model_parameters={
+                        "temperature": self.rag_config["AgentConfiguration"]["model_parameters"]["temperature"]}
+                )
+                # init the AISearch class , enveloping the Azure Search retriever
+                self.aisearch = AISearch(self.rag_config["AgentConfiguration"]["retrieval"]["deployment"]["name"],
+                                         self.rag_config["AgentConfiguration"]["retrieval"]["deployment"]["endpoint"],
+                                         self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["index_name"],
+                                         self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["index_semantic_configuration_name"])
 
-                ]
-            )
-            # create history aware retriever to build a search query for the user intent
-            # for more details see:
-            # https://api.python.langchain.com/en/latest/chains/langchain.chains.history_aware_retriever.create_history_aware_retriever.html
-            # This method creates a chain that takes conversation history and returns documents.
-            # If there is no chat_history, then the input is just passed directly to the retriever.
-            # If there is chat_history, then the prompt and LLM will be used to generate a search query.
-            # That search query is then passed to the retriever.
-            self._history_aware_user_intent_retriever = \
-                create_history_aware_retriever(self.aimodel.llm(),
-                                               self.aisearch.create_retriever(
-                    self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["search_type"],
-                    self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["top_k"]),
-                    self._user_intent_prompt_template
+                # initiate the session store
+                self._session_store = SimpleInMemorySessionStore()
+
+                # create a prompt template for user intent
+                # user intent is concluded from a chat history and the current user question
+                self._user_intent_prompt_template = ChatPromptTemplate.from_messages(
+                    [
+                        ("system",
+                         self.rag_config["AgentConfiguration"]["intent_system_prompt"]),
+                        MessagesPlaceholder("chat_history"),
+                        ("human", "{input}"),
+
+                    ]
+                )
+                # create history aware retriever to build a search query for the user intent
+                # for more details see:
+                # https://api.python.langchain.com/en/latest/chains/langchain.chains.history_aware_retriever.create_history_aware_retriever.html
+                # This method creates a chain that takes conversation history and returns documents.
+                # If there is no chat_history, then the input is just passed directly to the retriever.
+                # If there is chat_history, then the prompt and LLM will be used to generate a search query.
+                # That search query is then passed to the retriever.
+                self._history_aware_user_intent_retriever = \
+                    create_history_aware_retriever(self.aimodel.llm(),
+                                                   self.aisearch.create_retriever(
+                        self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["search_type"],
+                        self.rag_config["AgentConfiguration"]["retrieval"]["parameters"]["top_k"]),
+                        self._user_intent_prompt_template
+                    )
+
+                # prepare final chat chain with history aware retriever
+                self._chat_prompt_template = ChatPromptTemplate.from_messages(
+                    [
+                        ("system",
+                         self.rag_config["AgentConfiguration"]["chat_system_prompt"]),
+                        MessagesPlaceholder("chat_history"),
+                        ("human", "{input}"),
+                    ]
                 )
 
-            # prepare final chat chain with history aware retriever
-            self._chat_prompt_template = ChatPromptTemplate.from_messages(
-                [
-                    ("system",
-                     self.rag_config["AgentConfiguration"]["chat_system_prompt"]),
-                    MessagesPlaceholder("chat_history"),
-                    ("human", "{input}"),
-                ]
-            )
-
-            # Create a chain for passing a list of Documents to a model.
-            self._question_answer_chain = \
-                create_stuff_documents_chain(
-                    self.aimodel.llm(), self._chat_prompt_template)
+                # Create a chain for passing a list of Documents to a model.
+                self._question_answer_chain = \
+                    create_stuff_documents_chain(
+                        self.aimodel.llm(), self._chat_prompt_template)
 
             # Create retrieval chain that retrieves documents and then passes them on.
-            self._rag_chain = \
-                create_retrieval_chain(
-                    self._history_aware_user_intent_retriever, self._question_answer_chain)
+                self._rag_chain = \
+                    create_retrieval_chain(
+                        self._history_aware_user_intent_retriever, self._question_answer_chain)
 
-            # create a chain with message history automatic handling
-            self._conversational_rag_chain = RunnableWithMessageHistory(
-                self._rag_chain,
-                self.get_session_history,
-                input_messages_key="input",
-                history_messages_key="chat_history",
-                output_messages_key="answer",
-            )
-        except Exception as e:
-            logger.error(f"RAG.__init__#exception= {e}")
-            raise e
+                # create a chain with message history automatic handling
+                self._conversational_rag_chain = RunnableWithMessageHistory(
+                    self._rag_chain,
+                    self.get_session_history,
+                    input_messages_key="input",
+                    history_messages_key="chat_history",
+                    output_messages_key="answer",
+                )
+            except Exception as e:
+                logger.error(f"RAG.__init__#exception= {e}")
+                raise e
 
     def __call__(
         self,
@@ -135,7 +135,7 @@ class RAG:
         question: str = " "
     ) -> str:
         """>>>RAG Flow entry function."""
-        with tracer.start_as_current_span("RAG.__call__") as span:
+        with tracer.start_as_current_span("RAG.__call__span") as span:
             logger.info("RAG.__call__start_chat")
             span.set_attribute("session_id", session_id)
 
@@ -157,7 +157,7 @@ class RAG:
 
     def chat(self, session_id, question, **kwargs):
         logger.info(f"chat#session_id= {session_id}, question= {question}")
-        with tracer.start_as_current_span("RAG.__chat__") as span:
+        with tracer.start_as_current_span("RAG.__chat__span") as span:
             try:
                 span.set_attribute("session_id", session_id)
                 # this paramerter is deperecated
@@ -175,21 +175,21 @@ class RAG:
                                                                  config={"configurable": {
                                                                      "session_id": session_id}}
                                                                  )
-                logger.info(f"rag_main#session_id#response= {session_id}, response= {response}")
-                
+                logger.info(
+                    f"rag_main#session_id#response= {session_id}, response= {response}")
+
             except Exception as e:
                 logger.error(f"rag_main chat#exception= {e}")
                 raise e
-
+            logger.info(f"rag_main.chat#response= {response}")
             return response["answer"]
 
- 
+
 if __name__ == "__main__":
-        print("$$$$$$$$$$$$rag_main.py") 
-        rag = RAG()
-        
-   
-    
+    print("$$$$$$$$$$$$rag_main.py")
+    rag = RAG()
+
+
 """ 
      # Initialize the RAG class and empty history
     import uuid

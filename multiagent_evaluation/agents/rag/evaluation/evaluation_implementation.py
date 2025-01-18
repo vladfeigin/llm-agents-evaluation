@@ -55,30 +55,30 @@ def verify_prompty_files(evaluators: dict):
 def relevance(row):
     return evaluators["relevance"](
         response=row["outputs.output"],
-        context=row["inputs.context"],
-        query=row["inputs.question"]
+        context=row["context"],
+        query=row["question"]
     )["gpt_relevance"]
 
 
 def groundedness(row):
     return evaluators["groundedness"](
         response=row["outputs.output"],
-        context=row["inputs.context"]
+        context=row["context"]
     )["gpt_groundedness"]
 
 
 def similarity(row):
     return evaluators["similarity"](
         response=row["outputs.output"],
-        ground_truth=row["inputs.answer"],
-        query=row["inputs.question"]
+        ground_truth=row["answer"],
+        query=row["question"]
     )["gpt_similarity"]
 
 
 def coherence(row):
     return evaluators["coherence"](
         response=row["outputs.output"],
-        query=row["inputs.question"]
+        query=row["question"]
     )["gpt_coherence"]
 
 

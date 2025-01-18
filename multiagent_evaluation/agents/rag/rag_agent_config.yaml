@@ -1,15 +1,15 @@
-# yaml-language-server: $schema=../schemas/agent_config_schema.yaml
+# yaml-language-server: $schema=../../../../schemas/agent_config_schema.yaml
 AgentConfiguration:
   agent_name: rag_agent
   description: RAG Agent configuration
-  config_version: '8.5'
+  config_version: '9.1'
   application_version: '1.0'
   application_name: rag_llmops_workshop
   deployment:
-    name: gpt-4o-3
-    model_name: gpt-4o
+    name: gpt-4o-mini
+    model_name: gpt-4o-mini
     model_version: '2024-08-01'
-    endpoint: https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-10-01-preview
+    endpoint: https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview
     openai_api_version: 2024-10-01-preview
   model_parameters:
     temperature: 0.5
@@ -17,7 +17,7 @@ AgentConfiguration:
   retrieval:
     parameters:
       search_type: hybrid
-      top_k: 3
+      top_k: 5
       index_name: micirosoft-tech-stack-index-0
       index_semantic_configuration_name: vector-llmops-workshop-index-semantic-configuration
     deployment:
