@@ -7,7 +7,6 @@ import time
 from typing import Tuple
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from promptflow.tracing import start_trace
 from multiagent_evaluation.agents.rag.rag_main import RAG
 from multiagent_evaluation.agents.rag.evaluation.evaluation_implementation import eval_batch
 from multiagent_evaluation.utils.utils import configure_logging, configure_tracing, configure_aoai_env, load_agent_configuration
@@ -20,15 +19,8 @@ tracer = configure_tracing(collection_name=tracing_collection_name)
 
 # Path to the data file for batch evaluation
 data = "./multiagent_evaluation/agents/rag/evaluation/data.jsonl"
-GLOBAL_AGENT_CONFIG = None
-
-# this function is used to run the RAG flow for batch evaluation
-
-start_trace()
 
 # the function which runs the batch flow
-
-
 def run_batch(agent_config: dict, dump_output: bool = False) -> Tuple[dict, pd.DataFrame]:
 
     logger.info(">>>run_batch:Running batch flow for RAG evaluation.")
@@ -115,9 +107,6 @@ def run_and_eval_flow(config_file_dir:str ,config_file_name: str, dump_output: b
 # ----------------------------------------------------------------------------------------------------------------------------
 
 def main():
-
-    # init aoai global parameters
-    GLOBAL_AGENT_CONFIG = configure_aoai_env()
 
     config_dir = "./multiagent_evaluation/agents/rag/evaluation/configurations/generated/"
     files = [file for file in os.listdir(config_dir) if file.endswith(".yaml")]
