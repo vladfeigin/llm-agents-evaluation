@@ -41,8 +41,6 @@ class RAG:
                 # load configuration from default variant yaml in the agents/rag folder
                 logger.info("RAG.__init__#rag_config is empty, loading default configuration")
                 rag_config = load_agent_configuration("agents/rag", "rag_agent_config.yaml")
-            else:
-                rag_config =json.loads(rag_config)
             
             logger.info(f"RAG.__init__#agent_config = {rag_config}")
                 
@@ -181,7 +179,7 @@ class RAG:
             except Exception as e:
                 logger.error(f"rag_main chat#exception= {e}")
                 raise e
-
+            logger.info(f"rag_main.chat#response= {response}")
             return response["answer"]
 
  
