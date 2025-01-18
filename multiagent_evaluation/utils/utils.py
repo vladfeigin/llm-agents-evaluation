@@ -6,7 +6,10 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry import trace
 from azure.monitor.opentelemetry import configure_azure_monitor
+from azure.ai.inference.tracing import AIInferenceInstrumentor 
+from azure.core.settings import settings 
 from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
+
 import yaml
 import logging
 import os
@@ -200,23 +203,28 @@ def get_credential():
 def configure_tracing(collection_name: str = "llmops-workshop", enable_console_exporter: bool = True):
     # Initialize tracing provider only once
 
+    settings.tracing_implementation = "opentelemetry" 
+    
+    
     if not isinstance(trace.get_tracer_provider(), TracerProvider):
-        # instrument Langchain
-        langchain_instrumentor = LangchainInstrumentor()
-        if not langchain_instrumentor.is_instrumented_by_opentelemetry:
-            langchain_instrumentor.instrument()
-        # genereal tracing configuration
-        tracer_provider = TracerProvider()
-        trace.set_tracer_provider(tracer_provider)
-
         connection_string = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
         if not connection_string:
             raise ValueError(
                 "APPLICATIONINSIGHTS_CONNECTION_STRING environment variable is not set.")
 
         os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"] = connection_string
+        os.environ["AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED"] = "true"
 
         configure_azure_monitor(collection_name=collection_name)
+        AIInferenceInstrumentor().instrument()
+        
+        # instrument Langchain
+        langchain_instrumentor = LangchainInstrumentor()
+        if not langchain_instrumentor.is_instrumented_by_opentelemetry:
+            langchain_instrumentor.instrument()
+        # general tracing configuration
+        tracer_provider = TracerProvider()
+        trace.set_tracer_provider(tracer_provider)
 
         traces_exporter = AzureMonitorTraceExporter()
         trace_processor = BatchSpanProcessor(traces_exporter)
