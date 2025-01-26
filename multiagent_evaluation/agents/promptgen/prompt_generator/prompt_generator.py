@@ -7,7 +7,6 @@ import json
 from dotenv import load_dotenv
 load_dotenv()
 
-from promptflow.tracing import start_trace
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
@@ -18,59 +17,61 @@ from multiagent_evaluation.aimodel.ai_model import AIModel
 logger = configure_logging()
 tracer = configure_tracing(__file__)
 
-start_trace()
 
 class PromptGenerator:
 
     def __init__(self, agent_config:dict = None) -> None:
 
         logger.info("PromptGenerator.Initializing PromptEvaluator")
-        
-        try:
-            if agent_config is None:
-                # load configuration from default variant yaml 
-                logger.info("PromptGenerator.__init__#agent_config is empty, loading default configuration")
-                agent_config = load_agent_configuration("agents/promptgen/prompt_generator", "prompt_generator_config.yaml")
-            else:
-                agent_config =json.loads(agent_config)
+        with tracer.start_as_current_span("PromptGenerator.__init__span") as span:
+            try:
+                if agent_config is None:
+                    # load configuration from default variant yaml 
+                    logger.info("PromptGenerator.__init__#agent_config is empty, loading default configuration")
+                    agent_config = load_agent_configuration("agents/promptgen/prompt_generator", "prompt_generator_config.yaml")
+               
+                logger.info(f"__init__.agent_config = {agent_config}")
+                span.set_attribute("agent_config", agent_config)
                 
-            logger.info(f"__init__.agent_config = {agent_config}")
-            
-            self.api_key = os.getenv("AZURE_OPENAI_KEY")
-            # check if agent config is not None - throw exception
-            if agent_config is None or self.api_key is None:
-                logger.error("agent config and api_key are required")
-                raise ValueError("agent config and api_key are required")
+                self.api_key = os.getenv("AZURE_OPENAI_KEY")
+                # check if agent config is not None - throw exception
+                if agent_config is None or self.api_key is None:
+                    logger.error("agent config and api_key are required")
+                    raise ValueError("agent config and api_key are required")
 
-            self.agent_config = agent_config
+                self.agent_config = agent_config
 
-            # init the AIModel class enveloping a LLM model
-            self.aimodel = AIModel(
-                azure_deployment=self.agent_config["AgentConfiguration"]["deployment"]["name"],
-                openai_api_version=self.agent_config["AgentConfiguration"]["deployment"]["openai_api_version"],
-                azure_endpoint=self.agent_config["AgentConfiguration"]["deployment"]["endpoint"],
-                api_key=self.api_key,
-                model_parameters={"temperature": self.agent_config["AgentConfiguration"]["model_parameters"]["temperature"]}
-            )
-        except Exception as e:
-            logger.error(f"PromptEvaluator.__init__#exception= {e}")
-            raise e
+                # init the AIModel class enveloping a LLM model
+                self.aimodel = AIModel(
+                    azure_deployment=self.agent_config["AgentConfiguration"]["deployment"]["name"],
+                    openai_api_version=self.agent_config["AgentConfiguration"]["deployment"]["openai_api_version"],
+                    azure_endpoint=self.agent_config["AgentConfiguration"]["deployment"]["endpoint"],
+                    api_key=self.api_key,
+                    model_parameters={"temperature": self.agent_config["AgentConfiguration"]["model_parameters"]["temperature"]}
+                )
+            except Exception as e:
+                logger.error(f"PromptEvaluator.__init__#exception= {e}")
+                raise e
 
     def __call__(self, prompt:str, evaluation_dataset:str, evaluation_scores:str) -> str:
         logger.info("PromptGenerator.__call__#PromptGenerator is called")
         return self.generate_prompts(prompt, evaluation_dataset, evaluation_scores)
     
     def generate_prompts(self, prompt:str, evaluation_dataset:str, evaluation_scores:str) -> str:
+        
         logger.info("PromptGenerator.generate_prompts#Evaluating prompt")
-        prompt_template = PromptTemplate.from_template(self.agent_config["AgentConfiguration"]["system_prompt"])
-        #prompt = prompt_template.format(prompt=prompt, input=input)
-        #logger.info(f"PromptEvaluator.evaluate_prompt#prompt = {prompt}")
-        chain = prompt_template | self.aimodel.llm() | StrOutputParser()
-        return chain.invoke({"evaluation_dataset": evaluation_dataset, "prompt": prompt, "evaluation_scores":evaluation_scores})
+        with tracer.start_as_current_span("PromptGenerator.generate_prompts_span") as span:
+            prompt_template = PromptTemplate.from_template(self.agent_config["AgentConfiguration"]["system_prompt"])
+            #prompt = prompt_template.format(prompt=prompt, input=input)
+            #logger.info(f"PromptEvaluator.evaluate_prompt#prompt = {prompt}")
+            span.set_attribute("prompt", prompt)
+            span.set_attribute("evaluation_dataset", evaluation_dataset)
+            chain = prompt_template | self.aimodel.llm() | StrOutputParser()
+            return chain.invoke({"evaluation_dataset": evaluation_dataset, "prompt": prompt, "evaluation_scores":evaluation_scores})
         
     
         
-# To run locally from project root directory: python -m multiagent_evaluation.agents.promptgen.prompt_evaluator.prompt_evaluator    
+# To run locally from project root directory: python -m multiagent_evaluation.agents.promptgen.prompt_generator.prompt_generator   
 if __name__ == "__main__":
 
     prompt_generator = PromptGenerator()

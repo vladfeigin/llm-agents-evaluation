@@ -2,12 +2,11 @@ import os
 import json
 
 # initialize all environment variables from .env file
-#from opentelemetry import trace
+from opentelemetry import trace
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from promptflow.tracing import start_trace
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
@@ -18,21 +17,18 @@ from multiagent_evaluation.aimodel.ai_model import AIModel
 logger = configure_logging()
 tracer = configure_tracing(__file__)
 
-start_trace()
 
-class PromptEvaluator:
+class Evaluator:
 
     def __init__(self, agent_config:dict = None) -> None:
 
-        logger.info("PromptEvaluator.Initializing PromptEvaluator")
+        logger.info("Evaluator.Initializing")
         
         try:
             if agent_config is None:
                 # load configuration from default variant yaml 
-                logger.info("PromptEvaluator.__init__#agent_config is empty, loading default configuration")
-                agent_config = load_agent_configuration("agents/promptgen/prompt_evaluator", "prompt_evaluator_config.yaml")
-            else:
-                agent_config =json.loads(agent_config)
+                logger.info("Evaluator.__init__#agent_config is empty, loading default configuration")
+                agent_config = load_agent_configuration("agents/promptgen/prompt_evaluator", "evaluator_config.yaml")
                 
             logger.info(f"__init__.agent_config = {agent_config}")
             
@@ -54,15 +50,15 @@ class PromptEvaluator:
             )
             
         except Exception as e:
-            logger.error(f"PromptEvaluator.__init__#exception= {e}")
+            logger.error(f"Evaluator.__init__#exception= {e}")
             raise e
 
     def __call__(self, prompt:str, input:str) -> str:
-        logger.info("PromptEvaluator.__call__#PromptEvaluator is called")
+        logger.info("Evaluator.__call__#Evaluator is called")
         return self.evaluate_prompt(prompt, input)
     
     def evaluate_prompt(self, prompt:str, input:str) -> str:
-        logger.info("PromptEvaluator.evaluate_prompt#Evaluating prompt")
+        logger.info("Evaluator.evaluate_prompt#Evaluating prompt")
         prompt_template = PromptTemplate.from_template(self.agent_config["AgentConfiguration"]["system_prompt"])
         #prompt = prompt_template.format(prompt=prompt, input=input)
         #logger.info(f"PromptEvaluator.evaluate_prompt#prompt = {prompt}")
@@ -71,11 +67,11 @@ class PromptEvaluator:
         
     
         
-# To run locally from project root directory: python -m multiagent_evaluation.agents.promptgen.prompt_evaluator.prompt_evaluator    
+# To run locally from project root directory: python -m multiagent_evaluation.agents.promptgen.prompt_evaluator.evaluator    
 if __name__ == "__main__":
 
-    prompt_evaluator = PromptEvaluator()
-    result = prompt_evaluator(prompt="You are a domain-specific technology assistant. When you answer, you must verify that each point you include is explicitly stated in the context. 1.	Read the user’s question. 2.	Check the context for matching information. 3.	Answer solely using details found in the context. 4.	If you cannot find information in the context, politely ask for more details.", \
+    evaluator = Evaluator()
+    result = evaluator(prompt="You are a domain-specific technology assistant. When you answer, you must verify that each point you include is explicitly stated in the context. 1.	Read the user’s question. 2.	Check the context for matching information. 3.	Answer solely using details found in the context. 4.	If you cannot find information in the context, politely ask for more details.", \
         input="""{{
     "question": {{
         "0": "What's Microsoft Fabric?",

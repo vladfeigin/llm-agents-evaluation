@@ -21,39 +21,39 @@ AgentConfiguration:
     2. A batch of input-output data produced by that assistant.
 
     This data is provided as a JSONL file. Each line of the file has four fields:
-    1.	inputs.question – the user’s question
-    2.	inputs.answer – the expected or reference answer
-    3.	inputs.context – the context the assistant should rely on when answering
+    1.	question – the user’s question
+    2.	answer – the expected or reference answer
+    3.	context – the context the assistant should rely on when answering
     4.	outputs.output – the assistant’s actual answer, the one you must score
 
-    The requirement is that outputs.output must be strictly based on inputs.context, without using any knowledge external to that context.
+    The requirement is that outputs.output must be strictly based on the input context, without using any knowledge external to that context.
 
     Your task: For each line in the JSONL file, assign a score from 1 to 5 indicating how accurately outputs.output matches both inputs.answer and inputs.context:
     •	Score 1: The output is entirely incorrect or disregards the provided context.
     •	Score 5: The output is fully correct, consistent with the context, and matches the expected answer.
     
-    Explain and reason every score you decide about, include all missing, redundant or not correct details and facts in a provided answer.
+    Explain and reason every score you decide about, include all missing, redundant or not correct details and facts, which impact the score, in a provided answer.
 
     Provide a separate score for each line in the JSONL file.
 
     Here is an example of input json:
     
     {{
-    "inputs.question": {{
+    "question": {{
         "0": "What's Microsoft Fabric?",
         "1": "What is OneLake in Microsoft Fabric?",
         "2": "What are the core services in Microsoft Fabric?",
         "3": "How does Microsoft Fabric simplify analytics?",
         "4": "How is AI integrated in Microsoft Fabric?"
     }},
-    "inputs.answer": {{
+    "answer": {{
         "0": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses various services such as Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. Fabric integrates these components into a cohesive stack, simplifying analytics requirements by offering a seamlessly integrated, user-friendly platform. Key features: Unified data storage with OneLake, AI capabilities embedded within the platform, Centralized data management and governance,SaaS model.",
         "1": "OneLake in Microsoft Fabric is a unified storage system built on Azure Data Lake Storage (ADLS) Gen2. It provides a single SaaS experience and a tenant-wide store for data, serving both professional and citizen developers. OneLake simplifies data management by eliminating the need for understanding infrastructure concepts such as resource groups, RBAC, Azure Resource Manager, redundancy, or regions. It ensures easy data discovery, sharing, and uniform enforcement of policy and security settings, eliminating data silos.",
         "2": "The core services include Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, Databases and Power BI. These services are designed to work together seamlessly, providing a comprehensive set of analytics experiences tailored to specific user roles and tasks. The platform operates on a Software as a Service (SaaS) model, ensuring simplicity, integration, and centralized management.",
         "3": "Microsoft Fabric simplifies analytics by providing a unified, end-to-end platform that integrates various data and analytics services into a single, user-friendly environment. The key points: Unified platform, SaaS model,Centralized Data Storage, centralized Governance and Security, easy of use, embedded AI ",
         "4": "AI capabilities are embedded within Fabric, removing the need for separate AI integrations. The keys benefits: Embedded AI Capabilities, Copilot in Microsoft Fabric, Unified Data Management,Automated Machine Learning, Centralized Governance and Security "
     }},
-    "inputs.context": {{
+    "context": {{
         "0": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses data movement, processing, ingestion, transformation, real-time event routing, and report building. It offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. With Fabric, you don't need to assemble different services from multiple vendors. Instead, it offers a seamlessly integrated, user-friendly platform that simplifies your analytics requirements. Operating on a Software as a Service (SaaS) model, Fabric brings simplicity and integration to your solutions.",
         "1": "Microsoft Fabric integrates separate components into a cohesive stack. Instead of relying on different databases or data warehouses, you can centralize data storage with OneLake. AI capabilities are seamlessly embedded within Fabric, eliminating the need for manual integration. With Fabric, you can easily transition your raw data into actionable insights for business users. OneLake provides the data storage backbone for Fabric, bringing together data from multiple sources.",
         "2": "Microsoft Fabric offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. These services allow users to handle data end-to-end, from ingestion to analytics, all within a unified platform. The platform's integrated services enable users to transform raw data into actionable insights through various analytics workflows.",
