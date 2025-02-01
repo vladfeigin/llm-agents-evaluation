@@ -4,7 +4,7 @@ AgentConfiguration:
   description: RAG Agent configuration
   config_version: '9.1'
   application_version: '1.0'
-  application_name: rag_llmops_workshop
+  application_name: llmops_workshop
   deployment:
     name: gpt-4o-mini
     model_name: gpt-4o-mini

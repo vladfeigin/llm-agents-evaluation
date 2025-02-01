@@ -10,13 +10,12 @@ load_dotenv()
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-from multiagent_evaluation.utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
+from multiagent_evaluation.utils.utils import configure_tracing, configure_logging, load_agent_configuration
 from multiagent_evaluation.aimodel.ai_model import AIModel
 
 # Configure tracing and logging
 logger = configure_logging()
 tracer = configure_tracing(__file__)
-
 
 class Evaluator:
 
