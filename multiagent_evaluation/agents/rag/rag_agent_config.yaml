@@ -2,7 +2,7 @@
 AgentConfiguration:
   agent_name: rag_agent
   description: RAG Agent configuration
-  config_version: '9.1'
+  config_version: '1.0'
   application_version: '1.0'
   application_name: llmops_workshop
   deployment:

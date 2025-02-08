@@ -126,7 +126,7 @@ class RAG:
                     output_messages_key="answer",
                 )
             except Exception as e:
-                logger.error(f"RAG.__init__#exception= {e}")
+                logger.exception(f"RAG.__init__#exception= {e}")
                 raise e
 
     def __call__(

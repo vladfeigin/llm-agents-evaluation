@@ -2,25 +2,11 @@
 """
 generate-variants.py
 
-Generates multiple YAML configuration files (named `rag_agent_config_*.yaml`)
+Generates multiple YAML configuration files (named rag_agent_config_*.yaml)
 based on:
   - a base YAML template (agent_config_schema.yaml),
   - a JSON file (variants.json) that specifies possible values or ranges of values,
-    plus a new "active" attribute to skip certain items if active:false.
-
-Usage:
-    python generate-variants.py variants.json agent_config_schema.yaml
-
-Requirements:
-    - pyyaml (pip install pyyaml)
-    - jsonschema (pip install jsonschema)
-    
-Example of running the script, run from project root folder:
-./generate-variants.py ./agents/rag/variants.json ./agents/schemas/agent_config_schema.yaml \
-    --base_config_yaml ./agents/rag/rag_agent_config.yaml \
-    --max_variants 50 \
-    --output_dir ./agents/rag/evaluation/configurations/generated
-    
+    plus a new "active" attribute to skip certain items if active:false.    
 """
 
 import argparse
@@ -28,9 +14,11 @@ import json
 import os
 import sys
 from copy import deepcopy
+from typing import List
 
 import yaml
 from jsonschema import validate
+from multiagent_evaluation.utils.utils import load_agent_configuration
 
 
 def parse_args():
@@ -68,18 +56,15 @@ def parse_args():
     )
     return parser.parse_args()
 
-
-def load_schema(schema_path):
+def load_schema(schema_path: str):
     with open(schema_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
-
-def load_variants(variants_path):
+def load_variants(variants_path: str):
     with open(variants_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
-def load_base_config(base_config_path):
+def load_base_config(base_config_path: str):
     """
     Load and return the base rag_agent_config.yaml as a Python dict.
     If none provided, return a minimal base that aligns with the schema requirements.
@@ -131,7 +116,6 @@ def load_base_config(base_config_path):
             }
         }
 
-
 def float_range(start, end, step):
     """Generate a range of floats [start, end] with the given step."""
     vals = []
@@ -141,11 +125,9 @@ def float_range(start, end, step):
         current += step
     return vals
 
-
 def int_range(start, end, step):
     """Generate a range of integers [start, end] with the given step."""
     return list(range(start, end + 1, step))
-
 
 def is_active(d):
     """
@@ -159,7 +141,6 @@ def is_active(d):
     if val in [True, "true", "True", 1, "1"]:
         return True
     return False
-
 
 def parse_param_info(param_info):
     """
@@ -195,7 +176,6 @@ def parse_param_info(param_info):
     # If none recognized, return empty
     return []
 
-
 def list_of_dicts_to_param_dict(list_of_dicts):
     """
     The user gave something like model_parameters: [
@@ -222,7 +202,6 @@ def list_of_dicts_to_param_dict(list_of_dicts):
                     param_def[k] = v
             output[param_name] = param_def
     return output
-
 
 def build_combinations_for_section(section_variants):
     """
@@ -260,7 +239,6 @@ def build_combinations_for_section(section_variants):
 
     return combos
 
-
 def build_value_combinations(variants, key_name):
     """
     For a top-level or sub-level key (like "model_parameters", or "retrieval.parameters"),
@@ -278,7 +256,7 @@ def build_value_combinations(variants, key_name):
     data = variants[key_name]
 
     # 1) If it's a list of dicts
-    if isinstance(data, list):
+    if isinstance(data, list) and len(data) > 0 and all(isinstance(x, dict) for x in data):
         param_dict = list_of_dicts_to_param_dict(data)
         return build_combinations_for_section(param_dict)
 
@@ -290,18 +268,38 @@ def build_value_combinations(variants, key_name):
     return [{}]
 
 
-def main():
-    args = parse_args()
+def set_prompt_variants(variants:dict, prompt_variants: List[str]):
+    #from prompts dictionary retrieve the list of prompts and add them to the variants
+    prompts =[]
 
+    for prompt in prompt_variants["prompts"]:
+        prompts.append( prompt["prompt"] + "  \n<context>\n{context}\n</context>")
+    variants["chat_system_prompt"] = prompts
+    return variants
+    
+
+def generate_variants( schema_yaml:str, agent_folder: str, agent_config_file: str , max_variants:int, prompt_variants: List[str], variants:dict, output_dir:str):
+   
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    schema_yaml = os.path.join(project_root, schema_yaml)
+    output_dir = os.path.join(project_root, output_dir)
+    
+    # 0) Update variants dictionary
+    variants: dict = set_prompt_variants(variants, prompt_variants)
+    
     # 1) Load schema, variants, base
-    schema = load_schema(args.schema_yaml)
-    variants = load_variants(args.variants_json)
-    base_config = load_base_config(args.base_config_yaml)
+    schema = load_schema(schema_yaml)
+    #base_config = load_base_config(base_config_yaml)
+    base_config = load_agent_configuration(agent_folder, agent_config_file)
 
     # 2) Merge top-level strings like "intent_system_prompt" if present
-    for k in ["intent_system_prompt", "chat_system_prompt", "human_template"]:
-        if k in variants:
-            base_config["AgentConfiguration"][k] = variants[k]
+    #    (We assume "intent_system_prompt" is still a single string for now)
+    if "intent_system_prompt" in variants and isinstance(variants["intent_system_prompt"], str):
+        base_config["AgentConfiguration"]["intent_system_prompt"] = variants["intent_system_prompt"]
+
+    if "human_template" in variants and isinstance(variants["human_template"], str):
+        base_config["AgentConfiguration"]["human_template"] = variants["human_template"]
 
     # 3) Validate base_config
     try:
@@ -312,7 +310,6 @@ def main():
     agent_conf = base_config["AgentConfiguration"]
 
     # 4) Build combos for top-level "deployment"
-    #    Skip any with active:false
     main_deployments = variants.get("deployment", [])
     if isinstance(main_deployments, list) and len(main_deployments) > 0:
         # Filter out inactive
@@ -342,19 +339,34 @@ def main():
     # - retrieval parameters
     retrieval_param_combinations = build_value_combinations(retrieval_section, "parameters")
 
+    # ----------------------------------------------------------------------
+    ### Handle a list of chat_system_prompt values
+    # We now assume `chat_system_prompt` is *always* a list of strings in variants.json
+    # e.g. "chat_system_prompt": ["Prompt variant 1", "Prompt variant 2", ...]
+    # If it's missing, we fallback to using the base config's single prompt as the only option.
+    chat_prompts = variants.get("chat_system_prompt", None)
+    if chat_prompts is None or not isinstance(chat_prompts, list) or len(chat_prompts) == 0:
+        # fallback to single prompt from base_config
+        chat_prompts = [agent_conf["chat_system_prompt"]]
+    
+    # ----------------------------------------------------------------------
+
     # 7) Cartesian product
     from itertools import product
+    ### Add chat_prompts to the product
     all_combinations = list(
         product(
             main_deployments,
             model_param_combinations,
             retrieval_deployments,
-            retrieval_param_combinations
+            retrieval_param_combinations,
+            chat_prompts  # new dimension
         )
     )
+   
 
     # 8) Limit total variants
-    all_combinations = all_combinations[: args.max_variants]
+    all_combinations = all_combinations[: max_variants]
 
     # 9) config_version increment
     try:
@@ -362,12 +374,13 @@ def main():
     except ValueError:
         version_float = 1.0
 
-    output_dir = args.output_dir
+    output_dir = output_dir
     os.makedirs(output_dir, exist_ok=True)
 
-    # 10) Generate
     valid_count = 0
-    for idx, (dep, model_params, ret_dep, ret_params) in enumerate(all_combinations, start=1):
+    # ----------------------------------------------------------------------
+    ### Add chat_prompt to the loop 
+    for idx, (dep, model_params, ret_dep, ret_params, chat_prompt) in enumerate(all_combinations, start=1):
         new_conf = deepcopy(base_config)
         agent_conf_new = new_conf["AgentConfiguration"]
 
@@ -376,6 +389,9 @@ def main():
         agent_conf_new["model_parameters"].update(model_params)
         agent_conf_new["retrieval"]["deployment"] = deepcopy(ret_dep)
         agent_conf_new["retrieval"]["parameters"].update(ret_params)
+
+        ### set the chat_system_prompt from the new dimension
+        agent_conf_new["chat_system_prompt"] = chat_prompt
 
         # Bump config_version
         agent_conf_new["config_version"] = f"{version_float + 0.1 * idx:.1f}"
@@ -400,6 +416,15 @@ def main():
 
     print(f"Done. Generated {valid_count} YAML files.")
 
-
+# Run from project root:
+# python -m multiagent_evaluation.agents.tools.generate-variants
 if __name__ == "__main__":
-    main()
+    print("main")
+    args = parse_args()
+    generate_variants(
+        variants_path=args.variants_json,
+        schema_yaml=args.schema_yaml,
+        base_config_yaml=args.base_config_yaml,
+        max_variants=args.max_variants,
+        output_dir=args.output_dir
+    )
