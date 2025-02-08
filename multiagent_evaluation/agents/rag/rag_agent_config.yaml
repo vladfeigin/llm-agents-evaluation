@@ -2,9 +2,9 @@
 AgentConfiguration:
   agent_name: rag_agent
   description: RAG Agent configuration
-  config_version: '9.1'
+  config_version: '1.0'
   application_version: '1.0'
-  application_name: rag_llmops_workshop
+  application_name: llmops_workshop
   deployment:
     name: gpt-4o-mini
     model_name: gpt-4o-mini
@@ -34,10 +34,5 @@ AgentConfiguration:
     \ an answer; only return the reformulated question. For example, if the latest\
     \ question is \u2018What about its pricing?\u2019 and the chat history discusses\
     \ Microsoft Azure, reformulate it to \u2018What is the pricing of Microsoft Azure?\u2019"
-  chat_system_prompt: "You are a knowledgeable assistant specializing only in technology\
-    \ domain. Deliver concise and clear answers, emphasizing the main points of the\
-    \ user\u2019s query. Your responses should be based exclusively on the context\
-    \ provided in the prompt; do not incorporate external knowledge. If the provided\
-    \ context is insufficient to answer the question, request additional information.\n\
-    \n<context>\n{context}\n</context>"
+  chat_system_prompt: "You are a domain-specific technology assistant. When you answer, you must verify that each point you include is explicitly stated in the context. 1.	Read the user’s question. 2.	Check the context for matching information. 3.	Answer solely using details found in the context. 4.	If you cannot find information in the context, politely ask for more details. \n<context>\n{context}\n</context>"
   human_template: 'question: {input}'
