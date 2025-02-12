@@ -39,12 +39,8 @@ class AIModel:
     def llm(self) -> AzureChatOpenAI:
         return self._llm
 
-    def generate_response(self, prompt):
-        response = self.llm.invoke(prompt)
-        return response
-
-
 if __name__ == "__main__":
+    
 
     # Initialize the AI model
     azure_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")

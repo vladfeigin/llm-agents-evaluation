@@ -131,11 +131,11 @@ pillow==10.4.0
 platformdirs==4.3.2
 portalocker==2.10.1
 prompt_toolkit==3.0.47
-promptflow==1.16.2
+promptflow==1.17.2
 promptflow-azure==1.16.1
-promptflow-core==1.16.2
-promptflow-devkit==1.16.2
-promptflow-tracing==1.16.2
+promptflow-core==1.17.2
+promptflow-devkit==1.17.2
+promptflow-tracing==1.17.2
 proto-plus==1.25.0
 protobuf==4.25.5
 psutil==5.9.8

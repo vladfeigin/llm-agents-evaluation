@@ -418,13 +418,4 @@ def generate_variants( schema_yaml:str, agent_folder: str, agent_config_file: st
 
 # Run from project root:
 # python -m multiagent_evaluation.agents.tools.generate-variants
-if __name__ == "__main__":
-    print("main")
-    args = parse_args()
-    generate_variants(
-        variants_path=args.variants_json,
-        schema_yaml=args.schema_yaml,
-        base_config_yaml=args.base_config_yaml,
-        max_variants=args.max_variants,
-        output_dir=args.output_dir
-    )
+

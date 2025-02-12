@@ -1,7 +1,13 @@
-# this module is responsible for orchestrating the evaluation of the agents
-# it first calls run_and_eval_flow which runs the agent and evaluates the output
-# user add the task in natural language and the agent will be evaluated based on the task
-# python -m multiagent_evaluation.agents.orchestrator.evaluation_orchestrator
+"""
+This module is responsible for orchestrating the evaluation of the agents.
+Functions:
+    find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFrame, bool], Tuple[pd.DataFrame, pd.DataFrame]], agent_config_file_dir: str, agent_config_file_name: str, evaluation_dataset: str, base_variant: str, output_dir: str = None) -> pd.DataFrame:
+        Finds the optimal agent configuration by running initial evaluation, generating prompt variants, and evaluating multiple variants and other parameters.
+
+Usage:
+    Run the module using the command:
+    python -m multiagent_evaluation.agents.orchestrator.evaluation_orchestrator
+"""
 
 from typing import Tuple, Type, Callable
 import pandas as pd
@@ -16,6 +22,21 @@ CONFIG_SCHEMA = "./agents/schemas/agent_config_schema.yaml"
 
 
 def find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFrame, bool], Tuple[pd.DataFrame, pd.DataFrame]], agent_config_file_dir: str, agent_config_file_name: str, evaluation_dataset: str, base_variant: str, output_dir: str = None):
+    """
+    Finds the optimal configuration for an agent by evaluating multiple prompt variants.
+
+    Args:
+        agent (Type): The agent class to be evaluated.
+        eval_fn (Callable[[pd.DataFrame, bool], Tuple[pd.DataFrame, pd.DataFrame]]): The evaluation function that takes a DataFrame and a boolean flag, and returns a tuple of DataFrames.
+        agent_config_file_dir (str): Directory path where the agent configuration file is located.
+        agent_config_file_name (str): Name of the agent configuration file.
+        evaluation_dataset (str): Path to the dataset used for evaluation.
+        base_variant (str): Path to the base variant JSON file.
+        output_dir (str, optional): Directory where the output should be saved. Defaults to None.
+
+    Returns:
+        all_results: The results of the evaluation for all generated prompt variants.
+    """
 
     # 1. Run initial evaluation to serve as a baseline
     eval_res = run_and_eval_flow(agent, eval_fn, agent_config_file_dir,
@@ -42,7 +63,7 @@ def find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFram
         agent, eval_fn, output_dir, evaluation_dataset)
 
     # 5. analyze the results and decide on the best agent /  best prompt or run more iteration
-    # ...
+    # TODO
     return all_results
 
 

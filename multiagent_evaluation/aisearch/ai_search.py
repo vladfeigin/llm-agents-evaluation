@@ -173,23 +173,4 @@ class AISearch:
                 final_content += doc.page_content + "\t"
             return final_content
 
-# Main function to test the AISearch class
-if __name__ == "__main__":
-    try:
-        aisearch = AISearch()
-        content = aisearch.search("What Microsoft Fabric",
-                                  search_type='hybrid', top_k=3)
-        print("Content:>>>> ", content)
 
-        """
-        docs_retr = aisearch.retriever().invoke("What is Microsoft Fabric?")
-        content = ""
-        for doc in docs_retr:
-            content += doc.page_content + "###"
-            
-        print("Content:>>>> ", content)
-        """
-    except Exception as e:
-        logger.error(f"Error during search: {e}")
-    finally:
-        logger.info("Search completed.")

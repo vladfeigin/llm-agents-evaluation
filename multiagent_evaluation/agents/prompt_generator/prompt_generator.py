@@ -1,5 +1,4 @@
 import os
-import json
 from typing import List
 
 # initialize all environment variables from .env file

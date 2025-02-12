@@ -1,18 +1,32 @@
+"""
+Module: evaluator
+This module contains the Evaluator class which is responsible for evaluating prompts using a language model.  
+The Evaluator class uses the AIModel class to interact with the language model and evaluate prompts.
+Classes:
+    Evaluator: A class to evaluate prompts using a language model.
+Usage:
+    To run locally from the project root directory: 
+    python -m multiagent_evaluation.agents.promptgen.prompt_evaluator.evaluator
+
+    
+    A class to evaluate prompts using a language model.
+    Methods:
+        __init__(agent_config: dict = None) -> None:
+            Initializes the Evaluator with the given agent configuration.
+        __call__(prompt: str, input: str) -> str:
+            Calls the evaluate_prompt method to evaluate the given prompt and input.
+        evaluate_prompt(prompt: str, input: str) -> str:
+            Evaluates the given prompt and input using the language model.
+"""
 import os
-import json
-
-# initialize all environment variables from .env file
-from opentelemetry import trace
-
 from dotenv import load_dotenv
-load_dotenv()
-
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-
 from multiagent_evaluation.utils.utils import configure_tracing, configure_logging, load_agent_configuration
 from multiagent_evaluation.aimodel.ai_model import AIModel
 
+# initialize all environment variables from .env file
+load_dotenv()
 # Configure tracing and logging
 logger = configure_logging()
 tracer = configure_tracing(__file__)
