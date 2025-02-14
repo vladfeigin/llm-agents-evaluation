@@ -1,18 +1,19 @@
+"""
+This module is in charge to generate prompts for the agents.
+Those prompts are used to automatically generate multiple agents configuration variants for evaluation and selecting the best one.
+
+"""
+
 import os
 from typing import List
-
-# initialize all environment variables from .env file
-#from opentelemetry import trace
-
-from dotenv import load_dotenv
-load_dotenv()
 import pandas as pd
-
+from typing_extensions import TypedDict
+from dotenv import load_dotenv
 from langchain_core.prompts import PromptTemplate
-from typing_extensions import Annotated, TypedDict
-
-from multiagent_evaluation.utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
+from multiagent_evaluation.utils.utils import configure_tracing,configure_logging, load_agent_configuration
 from multiagent_evaluation.aimodel.ai_model import AIModel
+
+load_dotenv()
 
 # Configure tracing and logging
 logger = configure_logging()
@@ -39,7 +40,7 @@ class PromptGenerator:
                     logger.info("PromptGenerator.__init__#agent_config is empty, loading default configuration")
                     agent_config = load_agent_configuration("agents/prompt_generator", "prompt_generator_config.yaml")
                
-                logger.info(f"__init__.agent_config = {agent_config}")
+                logger.info("__init__.agent_config = %s", agent_config)
                 span.set_attribute("agent_config", agent_config)
                 
                 self.api_key = os.getenv("AZURE_OPENAI_KEY")
@@ -59,7 +60,7 @@ class PromptGenerator:
                     model_parameters={"temperature": self.agent_config["AgentConfiguration"]["model_parameters"]["temperature"]}
                 )
             except Exception as e:
-                logger.error(f"PromptEvaluator.__init__#exception= {e}")
+                logger.error("PromptEvaluator.__init__#exception= %s", e)
                 raise e
 
     def __call__(self, prompt:str, evaluation_dataset:str, evaluation_scores:str) -> str:

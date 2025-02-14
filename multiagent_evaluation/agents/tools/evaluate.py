@@ -1,11 +1,14 @@
-
 """
-This module provides functions to run and evaluate batch evaluations for agents using specified configurations and evaluation datasets.
+This module provides functions to run and evaluate the agents using specified agent configuration (***_agent_config.yaml) and evaluation datasets.
+You need to provide as an input evalation dataset in JSONL format, and the agent configuration file (***_agent_config.yaml) for the agent to be evaluated.
+For example for RAG Agent, you need to provide rag_agent_config.yaml and data.jsonl as input.
 """
 import os
 from pathlib import Path
 import json
 from typing import Tuple, Type, Callable
+import argparse
+import importlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -134,8 +137,8 @@ def run_and_eval_flow(agent_class: Type,
                 agent_class, agent_config, agent_evaluation_dataset, dump_output=dump_output)
             eval_res, eval_metrics = eval_batch_with_retry(
                 eval_fn, batch_output, dump_output=dump_output)
-        except Exception as e: 
-            logger.error(f"Error processing agent: {agent_config_file_name}: {e}")
+        except Exception as e:
+            logger.error("Error processing agent: %s: %s", agent_config_file_name, e)
             raise e
 
         # serialize the results from dictionary to json
@@ -184,16 +187,124 @@ def multi_variant_evaluation(agent_class: Type,
                 all_eval_results[file] = evaluation_res
 
             except Exception as e:
-                logger.error(f"Error processing {file}: {e}")
+                logger.error("Error processing %s: %s", file, e)
                 raise e
                 
 
     return all_eval_results
 
 # ------------------------------------------------------------------------------------------
-# From the root project run : python -m multiagent_evaluation.agents.tools.evaluate
+"""
+#From the root project run (single variant evaluation): 
+ python -m multiagent_evaluation.agents.tools.evaluate \
+  --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+  --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+  --config_dir agents/rag \
+  --config_file rag_agent_config.yaml \
+  --eval_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+  --dump_output \
+  --mode single
+
+# or for multiple variant evaluation:
+
+ python -m multiagent_evaluation.agents.tools.evaluate \
+  --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+  --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+  --config_dir agents/rag/evaluation/configurations/generated \
+  --eval_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+  --dump_output \
+  --mode multiple
+"""
 # ------------------------------------------------------------------------------------------
 
+
+
+
+def import_from_path(full_path: str):
+    """
+    Dynamically import an attribute (class or function) given its full module path.
+    For example: "multiagent_evaluation.agents.rag.rag_main.RAG"
+    """
+    module_path, attr_name = full_path.rsplit('.', 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, attr_name)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Run agent evaluation in single or multi-variant mode."
+    )
+    parser.add_argument(
+        "--agent_class",
+        type=str,
+        required=True,
+        help="Full module path and class name for the agent to be evaluated, e.g., multiagent_evaluation.agents.rag.rag_main.RAG"
+    )
+    parser.add_argument(
+        "--eval_fn",
+        type=str,
+        required=True,
+        help="Full module path and function name for evaluation function, e.g., multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch"
+    )
+    parser.add_argument(
+        "--config_dir",
+        type=str,
+        required=True,
+        help="Directory containing the agent configuration YAML file(s)."
+    )
+    parser.add_argument(
+        "--config_file",
+        type=str,
+        required=False,
+        help="Name of the agent configuration file (YAML) to use in single configuration mode."
+    )
+    parser.add_argument(
+        "--eval_dataset",
+        type=str,
+        required=True,
+        help="Path to the evaluation dataset in JSONL format."
+    )
+    parser.add_argument(
+        "--dump_output",
+        action="store_true",
+        help="If provided, the evaluation output will be dumped to a JSON file."
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["single", "multiple"],
+        default="single",
+        help="Evaluation mode: 'single' uses run_and_eval_flow; 'multiple' uses multi_variant_evaluation."
+    )
+    args = parser.parse_args()
+
+    # Dynamically import the agent class using the provided full path.
+    agent_class = import_from_path(args.agent_class)
+    eval_fn = import_from_path(args.eval_fn)
+
+    if args.mode == "single":
+        results = run_and_eval_flow(
+            agent_class,
+            eval_fn,
+            args.config_dir,
+            args.config_file,
+            args.eval_dataset,
+            dump_output=args.dump_output
+        )
+    else:  # mode == "multiple"
+        results = multi_variant_evaluation(
+            agent_class,
+            eval_fn,
+            args.config_dir,
+            args.eval_dataset
+        )
+    print("Evaluation completed successfully. Results:", results)
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+"""
 if __name__ == "__main__":
 
     # Evaluate the RAG agent
@@ -214,3 +325,4 @@ if __name__ == "__main__":
     # "./multiagent_evaluation/agents/rag/evaluation/data.jsonl")
 
     print("Evaluation completed successfully. Results>>>>>>: ", all_results)
+"""

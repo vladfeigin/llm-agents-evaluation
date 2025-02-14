@@ -9,7 +9,7 @@ AgentConfiguration:
     name: gpt-4o-3
     model_name: gpt-4o
     model_version: '2024-08-01'
-    endpoint: https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-10-01-preview
+    endpoint: https://<azure open ai instance name>.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-10-01-preview
     openai_api_version: 2024-10-01-preview
   model_parameters:
     temperature: 0.5

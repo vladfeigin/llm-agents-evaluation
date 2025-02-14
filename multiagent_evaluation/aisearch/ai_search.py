@@ -1,20 +1,24 @@
-from logging import INFO, getLogger
-from multiagent_evaluation.utils.utils import configure_logging
+#generate docstring for the class
+"""
+This module contains the AISearch class which is used to perform search operations using Azure AI Search.  
+AISearch is a wrapper class for the AzureSearch class from the langchain_community.vectorstores.azuresearch module.
+"""
+import os
+import atexit
+from dotenv import load_dotenv
 from opentelemetry import trace
 from azure.search.documents.indexes.models import (
-    ScoringProfile,
     SearchableField,
     SearchField,
     SearchFieldDataType,
     SimpleField,
-    TextWeights,
 )
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_community.retrievers import AzureAISearchRetriever
 from langchain_community.vectorstores.azuresearch import AzureSearch
-import os
-import atexit
-from dotenv import load_dotenv
+
+from multiagent_evaluation.utils.utils import configure_logging
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -37,10 +41,13 @@ _required_env_vars = [
 
 for var in _required_env_vars:
     if not os.getenv(var):
-        logger.error(f"Environment variable {var} is not set.")
+        logger.error("Environment variable %s is not set.", var)
         raise EnvironmentError(f"Environment variable {var} is not set.")
 
-# AISearch class to perform search operations
+"""
+AISearch wrapper class to perform search operations 
+"""
+
 class AISearch:
 
     # init method to initialize the class
@@ -48,7 +55,7 @@ class AISearch:
 
         logger.info("AISearch.Initializing Azure Search client.")
 
-        logger.info(f"ai search index name : {index_name}")
+        logger.info("ai search index name : %s", index_name)
         self.index_name = index_name
         self.index_semantic_configuration_name = index_semantic_configuration_name
 
@@ -115,9 +122,9 @@ class AISearch:
 
             atexit.register(self.__close__)
         except Exception as e:
-            logger.error(f"Error during ai search index initialization: {e}")
-            raise Exception(
-                f"Error during ai search index initialization: {e}")
+            logger.error("Error during ai search index initialization: %s", e)
+            raise RuntimeError(
+                f"Error during ai search index initialization: {e}") from e
 
     def __close__(self) -> None:
         """
@@ -125,7 +132,6 @@ class AISearch:
         """
         print("Closing Azure Search client.")
 
-    # TODO - add as parameter the search type and the top_k here instead having them as fixed values
     def create_retriever(self, search_type: str, top_k=3) -> AzureAISearchRetriever:
         # Create retriever object
         # supported search types: 'similarity', 'similarity_score_threshold', 'hybrid', 'hybrid_score_threshold', 'semantic_hybrid', 'semantic_hybrid_score_threshold'
@@ -144,7 +150,7 @@ class AISearch:
 
         self._vector_search.add_documents(documents)
 
-    # TODO: Add thresholds and output score
+    #TODO: Add thresholds and output score
     def search(self, query: str, search_type: str = 'hybrid', top_k: int = 5) -> str:
         """
         Search for similar documents in Azure Search.
@@ -156,7 +162,7 @@ class AISearch:
         :raises ValueError: If input is invalid.
         """
         logger.info(
-            f"Search: Searching for similar documents using query: {query}")
+            "Search: Searching for similar documents using query: %s", query)
         with tracer.start_as_current_span("aisearch") as aisearch_span:
             if not isinstance(query, str) or not query:
                 raise ValueError("Search query must be a non-empty string")

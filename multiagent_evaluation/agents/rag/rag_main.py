@@ -1,27 +1,29 @@
-# python -m rag.rag
-# this module encapsulates the RAG (Retrieval Augmented Generation) implementation
-# it leverages AIModule class and aisearch module to search for the answer
-# create RAG class
+"""
+This module encapsulates the RAG (Retrieval Augmented Generation) implementation
+it leverages aimodel module and aisearch module to create a conversational agent
+"""
 
-from multiagent_evaluation.aisearch.ai_search import AISearch
-from multiagent_evaluation.aimodel.ai_model import AIModel
-from multiagent_evaluation.session_store.session_store import SimpleInMemorySessionStore
-from multiagent_evaluation.utils.utils import configure_tracing, get_credential, configure_logging, load_agent_configuration
 import os
-import json
-# initialize all environment variables from .env file
-from opentelemetry import trace
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_history_aware_retriever, create_retrieval_chain
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import AIMessage, HumanMessage
 
 from dotenv import load_dotenv
-load_dotenv()
+from langchain.chains import (create_history_aware_retriever,
+                              create_retrieval_chain)
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.prompts import (ChatPromptTemplate, 
+                                    MessagesPlaceholder)
 
+from langchain_core.runnables.history import RunnableWithMessageHistory
+
+from multiagent_evaluation.aimodel.ai_model import AIModel
+from multiagent_evaluation.aisearch.ai_search import AISearch
+from multiagent_evaluation.session_store.session_store import \
+    SimpleInMemorySessionStore
+from multiagent_evaluation.utils.utils import (configure_logging,
+                                               configure_tracing,
+                                               load_agent_configuration)
+# initialize all environment variables from .env file
+load_dotenv()
 
 # Configure tracing and logging
 logger = configure_logging()
@@ -42,7 +44,7 @@ class RAG:
                     rag_config = load_agent_configuration(
                         "agents/rag", "rag_agent_config.yaml")
 
-                logger.info(f"RAG.__init__#agent_config = {rag_config}")
+                logger.info("RAG.__init__#agent_config = %s", rag_config)
                 span.set_attribute("agent config", rag_config)
 
                 self.api_key = os.getenv("AZURE_OPENAI_KEY")
@@ -126,7 +128,7 @@ class RAG:
                     output_messages_key="answer",
                 )
             except Exception as e:
-                logger.exception(f"RAG.__init__#exception= {e}")
+                logger.exception("RAG.__init__#exception= %s", e)
                 raise e
 
     def __call__(
@@ -141,7 +143,7 @@ class RAG:
 
             response = self.chat(session_id, question)
 
-            logger.info(f"RAG.__call__#response= {response}")
+            logger.info("RAG.__call__#response= %s", response)
             return response
 
     def get_chat_prompt_template(self):
@@ -149,14 +151,14 @@ class RAG:
 
     def get_session_history(self, session_id: str) -> BaseChatMessageHistory:
 
-        logger.info(f"get_session_history#session_id= {session_id}")
+        logger.info("get_session_history#session_id= %s", session_id)
         if session_id not in self._session_store.get_all_sessions_id():
             self._session_store.create_session(session_id)
 
         return self._session_store.get_session(session_id)
 
     def chat(self, session_id, question, **kwargs):
-        logger.info(f"chat#session_id= {session_id}, question= {question}")
+        logger.info("chat#session_id= %s, question= %s", session_id, question)
         with tracer.start_as_current_span("RAG.__chat__span") as span:
             try:
                 span.set_attribute("session_id", session_id)
@@ -176,43 +178,14 @@ class RAG:
                                                                      "session_id": session_id}}
                                                                  )
                 logger.info(
-                    f"rag_main#session_id#response= {session_id}, response= {response}")
+                    "rag_main#session_id#response= %s, response= %s", session_id, response)
 
             except Exception as e:
-                logger.error(f"rag_main chat#exception= {e}")
+                logger.error("rag_main chat#exception= %s", e)
                 raise e
-            logger.info(f"rag_main.chat#response= {response}")
+            logger.info("rag_main.chat#response= %s", response)
             return response["answer"]
 
 
 if __name__ == "__main__":
-    print("$$$$$$$$$$$$rag_main.py")
     rag = RAG()
-
-
-""" 
-     # Initialize the RAG class and empty history
-    import uuid
-    rag = RAG()
-    session_id = str(uuid.uuid4())
-    resp = rag(session_id, "What's Microsoft Fabric?")
-    print (f"***response1 = {resp}")
-    
-
-    resp = rag.chat(session_id, question="What's Microsoft Fabric Data Factory?")
-    print (f"***response1 = {resp}")
-    
-    resp = rag.chat(session_id, question="List all data sources it supports?")
-    print (f"***response2 = {resp}")
-    
-    resp = rag.chat(session_id, question="Does it support CosmosDB?")
-    print (f"***response3 = {resp}")
-    
-    resp = rag.chat(session_id, question="List all my previous questions.")
-    print (f"***response4 = {resp}")
-
-    new_session_id = str(uuid.uuid4())
-    resp = rag.chat(new_session_id, question="List all my previous questions.")
-    print (f"***response5 = {resp}")
-
-"""

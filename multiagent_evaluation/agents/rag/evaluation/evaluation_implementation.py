@@ -1,13 +1,19 @@
+"""
+This module contains the implementation of the evaluation functions for the RAG Agent.
+It uses the Azure AI Evaluation SDK (azure.ai.evaluation) to evaluate the generated responses.
+The azure.ai.evaluation provides built in classes to evaluate the relevance, groundedness, similarity, and coherence metrics of the responses.
+ """
+
 import os
 import pandas as pd
 from dotenv import load_dotenv
-from multiagent_evaluation.utils.utils import configure_logging
 from azure.ai.evaluation import (
     RelevanceEvaluator,
     GroundednessEvaluator,
     SimilarityEvaluator,
     CoherenceEvaluator,
 )
+from multiagent_evaluation.utils.utils import configure_logging
 
 # Load environment variables
 load_dotenv()
@@ -34,20 +40,19 @@ evaluators = {
 
 # Function to verify prompt file paths
 
-
 def verify_prompty_files(evaluators: dict):
     for name, evaluator in evaluators.items():
         try:
             prompty_file = evaluator.PROMPTY_FILE
             if os.path.exists(prompty_file):
                 logger.info(
-                    f"Evaluator '{name}' is using existing prompty file: {prompty_file}")
+                    "Evaluator '%s' is using existing prompty file: %s", name, prompty_file)
             else:
                 logger.error(
-                    f"Evaluator '{name}' is using missing prompty file: {prompty_file}")
+                    "Evaluator '%s' is using missing prompty file: %s", name, prompty_file)
         except AttributeError:
             logger.warning(
-                f"Evaluator '{name}' does not have a PROMPTY_FILE attribute.")
+                "Evaluator '%s' does not have a PROMPTY_FILE attribute.", name)
 
 # Individual evaluator functions
 
@@ -91,8 +96,6 @@ evaluator_funcs = {
 }
 
 # Calculate average score
-
-
 def calc_score(scores):
     return sum(scores) / len(scores) if scores else 0
 
@@ -135,7 +138,7 @@ def eval_batch(batch_output: pd.DataFrame, dump_output: bool = False):
         # Calculate overall average scores
         eval_metrics = calculate_overall_score(scores)
     except Exception as e:
-        logger.exception(f"An error occurred during batch evaluation: {e}")
+        logger.exception("An error occurred during batch evaluation: %s", e)
         print("EXCEPTION in Evaluaitons: ", e)
         raise e
 

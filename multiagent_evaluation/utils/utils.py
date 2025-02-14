@@ -1,19 +1,26 @@
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from azure.monitor.opentelemetry.exporter import AzureMonitorLogExporter, AzureMonitorTraceExporter, AzureMonitorMetricExporter
-from opentelemetry.instrumentation.langchain import LangchainInstrumentor
-from opentelemetry.instrumentation.logging import LoggingInstrumentor
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry import trace
-from azure.monitor.opentelemetry import configure_azure_monitor
-from azure.ai.inference.tracing import AIInferenceInstrumentor 
-from azure.core.settings import settings 
-from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
-
-import yaml
+"""
+This module contains common utility functions.
+"""
 import logging
 import os
+import yaml
+
+from azure.ai.inference.tracing import AIInferenceInstrumentor
+from azure.core.settings import settings
+from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
+from azure.monitor.opentelemetry import configure_azure_monitor
+from azure.monitor.opentelemetry.exporter import (AzureMonitorLogExporter,
+                                                  AzureMonitorMetricExporter,
+                                                  AzureMonitorTraceExporter)
 from dotenv import load_dotenv
+from opentelemetry import trace
+from opentelemetry.instrumentation.langchain import LangchainInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import (BatchSpanProcessor,
+                                            ConsoleSpanExporter)
+
 load_dotenv()
 
 

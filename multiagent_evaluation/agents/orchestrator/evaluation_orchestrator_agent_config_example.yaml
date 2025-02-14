@@ -9,7 +9,7 @@ AgentConfiguration:
     name: gpt-4o-mini
     model_name: gpt-4o-mini
     model_version: '2024-08-01'
-    endpoint: https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview
+    endpoint: https://<azure open ai instance name>.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview
     openai_api_version: 2024-10-01-preview
   model_parameters:
     temperature: 0.5
@@ -25,7 +25,7 @@ AgentConfiguration:
       model_version: '2024-08-01'
       openai_api_version: 2024-10-01-preview
       name: text-embedding-ada-002
-      endpoint: https://openai-australia-east-303474.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15
+      endpoint: https://<azure open ai instance name>.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15
   system_prompt: > 
           Your task is to orchestrate LLM agents quality evaluation process.
           Your goal is to achive maximum qiality scoring in limited number of evaluation loops.

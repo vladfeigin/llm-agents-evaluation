@@ -1,7 +1,8 @@
-import uuid
 from abc import ABC, abstractmethod
 # Configure logging
-from logging import INFO, getLogger
+from logging import getLogger
+from langchain_community.chat_message_histories import ChatMessageHistory
+
 # Logging calls with this logger will be tracked
 logger = getLogger(__name__)
 
@@ -55,9 +56,6 @@ class SessionStoreAbstract(ABC):
         return f"{self.__class__.__name__}({self._sessions})"
     
     
-from langchain_community.chat_message_histories import ChatMessageHistory
-from typing import List
-from langchain_core.messages import BaseMessage
 
 #simple in memory session store. The messages are kept as a list in memory
 #for production use persistent implemenation like : RedisChatMessageHistory

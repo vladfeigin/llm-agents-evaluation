@@ -59,3 +59,12 @@ multiagent_evaluation/agents/promptgen/prompt_generator/__pycache__/prompt_gener
 multiagent_evaluation/agents/tools/__pycache__/evaluate.cpython-311.pyc
 *.pyc
 
+multiagent_evaluation/session_store/*.pyc
+multiagent_evaluation/agents/rag/evaluation/config_del.json_del
+config_del.json_del
+multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
+multiagent_evaluation/agents/orchestrator/evaluation_orchestrator_agent_config.yaml
+multiagent_evaluation/agents/orchestrator/evaluation_orchestrator_agent_config.yaml
+multiagent_evaluation/agents/prompt_evaluator/evaluator_config.yaml
+multiagent_evaluation/agents/orchestrator/evaluation_orchestrator_agent_config.yaml
+multiagent_evaluation/agents/prompt_evaluator/evaluator_config.yaml

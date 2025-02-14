@@ -1,32 +1,29 @@
 """
-The environment variables are loaded from the `.env` file in the same directory as this notebook.
+#This module serves as a data ingestion script for ingesting documents into the AI Search index to be used by RAG Agent.
+#Bring your own data and ingest it into the AI Search index for using in RAG Agent.
 """
 import sys
 import os
-
-# Add project root to sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import argparse
-from utils.utils import (configure_aoai_env,
-                         configure_logging,
-                         configure_embedding_env,
-                         configure_docintell_env,
-                         get_credential)
 from io import BytesIO
-from aisearch.ai_search import AISearch
+from typing import List
+import argparse
+from dotenv import load_dotenv
+from azure.storage.blob import BlobServiceClient
+from azure.identity import DefaultAzureCredential
+
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain.text_splitter import MarkdownHeaderTextSplitter
 from langchain_community.document_loaders import AzureAIDocumentIntelligenceLoader
-from typing import List
-from azure.storage.blob import BlobServiceClient
-from azure.identity import DefaultAzureCredential
-import os
-from dotenv import load_dotenv
+from multiagent_evaluation.utils.utils import (configure_aoai_env,
+                         configure_embedding_env,
+                         configure_docintell_env,)
+
+from multiagent_evaluation.aisearch.ai_search import AISearch
+
 _ = load_dotenv()
 
-# from langchain_community.vectorstores.azuresearch import AzureSearch
-
+# Add project root to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 embedding_env = configure_embedding_env()
 aoai_env = configure_aoai_env()
@@ -36,6 +33,7 @@ docintel_env = configure_docintell_env()
 def process_document(doc_path, mode="markdown"):
     """
     Process a document using Azure AI Document Intelligence and split it into chunks based on markdown headers.
+    Ingest markdown chunks into the AI Search index.
     """
     # Load the document using Azure AI Document Intelligence.
     loader = AzureAIDocumentIntelligenceLoader(file_path=doc_path,
@@ -159,13 +157,8 @@ if __name__ == "__main__":
     # If you need a new index to be created, update your parameters accordingly.
     #
     # Example usage:
-    # python semantic_chunking_di.py \
-    #   --index_name "myIndexName" \
-    #   --index_semantic_configuration_name "mySemanticConfigName"
-
-    # example usage:
-    # python semantic_chunking_di.py --index_name xx-index1 --index_semantic_configuration_name vector-llmops-workshop-index-semantic-configuration --input_folder /Users/vladfeigin/myprojects/dai-demos/aidemos/llmops/data_preparation/data
-
+    # From project root directory, run the following command:
+    # python -m multiagent_evaluation.data_ingestion.semantic_chunking_di --index_name myindex --input_folder ./multiagent_evaluation/data_ingestion/data
     try:
 
         embedding_env = configure_embedding_env()
@@ -173,7 +166,7 @@ if __name__ == "__main__":
         docintel_env = configure_docintell_env()
 
         parser = argparse.ArgumentParser(
-            description="Run the script with specified parameters for embedding and indexing.",
+            description="Run the script with specified parameters for indexing .",
             add_help=True
         )
 

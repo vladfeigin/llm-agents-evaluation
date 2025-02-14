@@ -2,7 +2,7 @@
 """
 generate-variants.py
 
-Generates multiple YAML configuration files (named rag_agent_config_*.yaml)
+Generates multiple YAML configuration files (named **_agent_config.yaml)
 based on:
   - a base YAML template (agent_config_schema.yaml),
   - a JSON file (variants.json) that specifies possible values or ranges of values,
@@ -290,7 +290,6 @@ def generate_variants( schema_yaml:str, agent_folder: str, agent_config_file: st
     
     # 1) Load schema, variants, base
     schema = load_schema(schema_yaml)
-    #base_config = load_base_config(base_config_yaml)
     base_config = load_agent_configuration(agent_folder, agent_config_file)
 
     # 2) Merge top-level strings like "intent_system_prompt" if present
