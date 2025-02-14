@@ -33,7 +33,7 @@ For example the evaluation data set for conversational flow, could have the foll
 
 `chat-history` is a list of previous questions and answers.
 
-`ground-truth` is the expected answer.
+`answer` is the expected answer.
 
 `context` is the context for the question, retrieved from the search index.
 
