@@ -8,7 +8,7 @@ Usage:
     Run the module using the command:
     python -m multiagent_evaluation.agents.orchestrator.evaluation_orchestrator
 """
-
+import json
 from typing import Tuple, Type, Callable
 import pandas as pd
 from multiagent_evaluation.agents.tools.evaluate import run_and_eval_flow, multi_variant_evaluation
@@ -19,6 +19,7 @@ from multiagent_evaluation.agents.tools.generate_variants import generate_varian
 PROMPT_GENERATOR_FOLDER = "agents/prompt_generator"
 PROMPT_GENERATIR_CONFIG_FILE = "prompt_generator_config.yaml"
 CONFIG_SCHEMA = "./agents/schemas/agent_config_schema.yaml"
+NUMBER_OF_VARIANTS_GENERATED = 100
 
 
 def find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFrame, bool], Tuple[pd.DataFrame, pd.DataFrame]], agent_config_file_dir: str, agent_config_file_name: str, evaluation_dataset: str, base_variant: str, output_dir: str = None):
@@ -52,18 +53,18 @@ def find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFram
     generated_prompts = pgen.generate_prompts(
         evaluated_agent_config["AgentConfiguration"]["chat_system_prompt"], eval_res)
     # load and update variants.json
-    with open(base_variant, "r", encoding="utf-8") as variants:
-        #variants: dict = json.load(open(base_variant, "r", encoding="utf-8"))
-        # 3. generate the multiple variantshi i can use
+    with open(base_variant, "r", encoding="utf-8") as variants_file:
+        variants: dict = json.load(variants_file)
+        # 3. generate the multiple variant for the agent configuration and evaluation
         generate_variants(CONFIG_SCHEMA, agent_config_file_dir,
-                      agent_config_file_name, 100, generated_prompts, variants, output_dir)
+                      agent_config_file_name, NUMBER_OF_VARIANTS_GENERATED, generated_prompts, variants, output_dir)
 
     # 4 run the evaluation for the multiple variants
     all_results = multi_variant_evaluation(
         agent, eval_fn, output_dir, evaluation_dataset)
 
     # 5. analyze the results and decide on the best agent /  best prompt or run more iteration
-    # TODO
+    # TODO analyze the results and decide on the best agent /  best prompt or run more iteration
     return all_results
 
 

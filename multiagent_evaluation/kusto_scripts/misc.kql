@@ -1,0 +1,286 @@
+//-------------------------------------------------
+// Misc. Queries 
+//-------------------------------------------------
+
+opentel_traces
+| mv-expand records 
+| where todatetime(records.['time']) >= todatetime("2025-01-04")
+| where records.Type == "AppTraces"
+| extend parsed_message = parse_json(records.Message) 
+| summarize count() by tostring(records.Type)
+
+
+opentel_traces
+| mv-expand records 
+| where todatetime(records.['time']) >= todatetime("2025-01-04")
+| where records.Type == "AppDependencies"
+| extend properties = records.Properties
+| summarize count() by tostring(properties.span_type)
+
+// ---------------------------------------------------
+// Search details 
+//----------------------------------------------------
+
+opentel_traces
+| mv-expand records 
+| where todatetime(tostring(records.['time'])) >= todatetime("2025-01-04")
+| where records.Target == 'retrieve_documents.task'
+| where records.Type == "AppDependencies"
+| extend EventTime = todatetime(records.['time'])
+| extend OperationId = records.OperationId
+| extend ParentId = records.ParentId
+| extend properties = records.Properties
+| extend duration = records.DurationMs
+| extend searchInput = properties.['traceloop.entity.input']
+| extend searchOutput = properties.['traceloop.entity.output']
+
+
+
+//-------------------------------------
+//Ongoing
+// ------------------------------------
+
+
+# ongoing, includes user intent calls to openai when there is a history (every question generate 2 call, except very first one), also we include embeddings tokens 
+opentel_traces
+| mv-expand records 
+| where todatetime(records.['time']) >= todatetime("2025-01-04")
+| where records.Type == "AppDependencies"
+| extend properties = records.Properties
+| where properties.span_type in ('LLM', "Embedding") 
+| where properties.function in ('openai.resources.chat.completions.Completions.create', 'openai.resources.embeddings.Embeddings.create')
+| extend model_name = properties.['llm.response.model']
+| extend operation_id = records.OperationId
+| extend parent_id = records.ParentId
+| extend inputs = properties.inputs
+| extend output = properties['llm.generated_message']
+| extend ch = properties.output
+| sort by EventProcessedUtcTime
+
+
+
+// #######################################################
+// Check Ongoing Application Usage
+// ########################################################
+
+OngoingUsage 
+| where EventTime >= todatetime("2025-01-04")
+| sort by EventTime
+
+ApplicationDetails
+| where EventTime >= todatetime("2025-01-04")
+|  sort by EventTime
+
+
+.set-or-replace ApplicationUsage <|
+ApplicationDetails
+| join OngoingUsage on OperationId
+|project 
+    EventTime,
+    OperationId,
+    ParentId,
+    ApplicationName,
+    ApplicationVersion,
+    SessionId,
+    ConfigVersion,
+    Duration,
+    Success,
+    Prompt,
+    Output,
+    TotalTokens,
+    PromptTokens,
+    CompletionTokens,
+    ModelName, 
+    Deployment
+
+ApplicationUsage
+| where EventTime >= todatetime("2025-01-04")
+| sort by EventTime
+
+
+
+// #######################################################
+// evaluation metrics  (via logs)
+// ########################################################
+
+opentel_traces
+| mv-expand records 
+| where todatetime(records.['time']) >= todatetime("2025-01-04")
+| where records.Type == "AppTraces"
+| extend message = records.Message
+| where message contains "batch-evaluation-flow-raw"
+
+
+opentel_traces
+| mv-expand records 
+| where todatetime(records.['time']) >= todatetime("2025-01-04")
+| where records.Type == "AppTraces"
+| extend message = records.Message
+| where message contains "batch-evaluation-flow-metrics"
+
+
+// looking at specific operation 
+OngoingUsage
+| where OperationId == '261f951b-bed1-d882-cfda-0141930f6379'
+| sort by EventTime
+
+// same operation is in corresponding search 
+SearchDetails
+| where OperationId == '261f951b-bed1-d882-cfda-0141930f6379'
+| sort by EventTime
+
+
+
+EvaluationMetrics | 
+extend PerformanceScore = Coherence + Groundedness + Relevance + Similarity | 
+summarize avgPerformanceScore=avg(PerformanceScore) by ConfigVersion | 
+top 5 by avgPerformanceScore desc
+
+
+EvaluationMetrics 
+| extend PerformanceScore = Coherence + Groundedness + Relevance + Similarity 
+| summarize avgPerformanceScore=avg(PerformanceScore) by ConfigVersion 
+| extend avgPerformanceScore = round(avgPerformanceScore, 3) 
+| top 5 by avgPerformanceScore desc
+
+
+
+let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppTraces" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+    | project
+        EventTime = todatetime((item)["time"]),
+        OperationId = toguid(item.OperationId),
+        ParentId = tostring(item.ParentId),
+        Message = dynamic_to_json(item.Message)
+    | where Message has "batch-evaluation-flow-metrics"
+    | extend parsed_json = parse_json(Message)
+    | where EventTime >= todatetime("2025-01-18")
+   
+
+   let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppTraces" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+    | project
+        EventTime = todatetime((item)["time"]),
+        OperationId = toguid(item.OperationId),
+        ParentId = tostring(item.ParentId),
+        Message = dynamic_to_json(item.Message)
+    | where Message has "batch-evaluation-flow-metrics"
+    | extend parsed_json = parse_json(Message)
+    | where EventTime >= todatetime("2025-01-18")
+    | extend 
+        AgentName = tostring(parsed_json.metadata.AgentConfiguration.agent_name),		
+        ConfigVersion = tostring(parsed_json.metadata.AgentConfiguration.config_version),
+        ModelName = tostring(parsed_json.metadata.AgentConfiguration.deployment.model_name),
+        ModelVersion = tostring(parsed_json.metadata.AgentConfiguration.deployment.model_version),
+        ModelDeploymentName = tostring(parsed_json.metadata.AgentConfiguration.deployment.name),
+        OpenAIAPIVersion = tostring(parsed_json.metadata.AgentConfiguration.deployment.openai_api_version),
+        IntentSystemPrompt = tostring(parsed_json.metadata.AgentConfiguration.intent_system_prompt),
+        ChatSystemPrompt = tostring(parsed_json.metadata.AgentConfiguration.chat_system_prompt),
+        Deployment = tostring(parsed_json.metadata.AgentConfiguration.deployment.endpoint),
+        Temperature = tostring(parsed_json.metadata.AgentConfiguration.model_parameters.temperature),
+        Seed = tolong(parsed_json.metadata.AgentConfiguration.model_parameters.seed),
+        EmbeddingEndpoint = tostring(parsed_json.metadata.AgentConfiguration.retrieval.deployment.endpoint),
+        EmbeddingDeployment = tostring(parsed_json.metadata.AgentConfiguration.retrieval.deployment.name),
+        SearchType = tostring(parsed_json.metadata.AgentConfiguration.retrieval.parameters.search_type),
+        SearchTopK = tolong(parsed_json.metadata.AgentConfiguration.retrieval.parameters.top_k),
+        TotalTokens = tolong(parsed_json.metadata.properties.system_metrics.total_tokens),
+        PromptTokens = tolong(parsed_json.metadata.properties.system_metrics.prompt_tokens),
+        CompletionTokens = tolong(parsed_json.metadata.properties.system_metrics.completion_tokens),
+        Duration = tolong(parsed_json.metadata.properties.system_metrics.duration)       
+    | where isnotempty(AgentName)         
+    | mv-expand result = parsed_json.result
+    | extend metric = tostring(result.metric), score = toreal(result.score)
+    | project-away Message, parsed_json, result
+    | evaluate pivot(metric, any(score))
+    | sort by EventTime asc
+    | project
+        EventTime,
+        OperationId,
+        ParentId,
+        AgentName,
+        ConfigVersion,
+        ModelName,
+        ModelVersion,
+        ModelDeploymentName,
+        OpenAIAPIVersion,
+        Deployment,
+        TotalTokens,
+        PromptTokens,
+        CompletionTokens,
+        Duration,
+        Temperature,
+        Seed,
+        EmbeddingEndpoint,
+        EmbeddingDeployment,
+        SearchType,
+        SearchTopK,
+        IntentSystemPrompt,
+        ChatSystemPrompt,
+        Coherence = coherence,
+        Groundedness = groundedness,
+        Relevance = relevance,
+        Similarity = similarity
+
+
+        let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppTraces" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+    | project
+        EventTime = todatetime((item)["time"]),
+        OperationId = toguid(item.OperationId),
+        ParentId = tostring(item.ParentId),
+        Message = dynamic_to_json(item.Message)
+    | where Message has "batch-evaluation-flow-raw"
+    | where EventTime >= todatetime("2025-01-18")
+    | extend parsed_json = parse_json(Message)
+    | mv-expand result = parsed_json.result
+    | where result contains "question"
+    | extend 
+        SessionId = tostring(result["session_id"]),
+        Question = tostring(result["question"]),
+        GroundTruth = tostring(result["answer"]),
+        Context = tostring(result["context"]),
+        ModelAnswer = tostring(result["outputs.output"]),
+        Relevance = tolong(result["relevance"]),
+        Groundedness = tolong(result["groundedness"]),
+        Similarity = tolong(result["similarity"]),
+        Coherence = tolong(result["coherence"]),
+        EvaluationDataSet = tostring(parsed_json.metadata.data),
+        EvaluationPortalUrl = tostring(parsed_json.metadata.portal_url)    
+    | project-away result,Message, parsed_json 
+
+
+
+    let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppDependencies" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+     | where item.
+     | where item contains ("RAG.__chat__span") | take 10
+
+

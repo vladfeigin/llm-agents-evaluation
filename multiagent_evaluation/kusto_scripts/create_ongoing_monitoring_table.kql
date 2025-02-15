@@ -1,0 +1,105 @@
+     //--  ongoing usage details
+
+      .create-or-alter function OngoingUsageInsert() {   
+        let ongoing_expanded_table=
+        traces
+        | mv-expand records 
+        | where records.Type == 'AppDependencies';
+        ongoing_expanded_table
+        | project
+            EventTime = todatetime((records)["time"]),
+            OperationId = toguid(records.OperationId),
+            ParentId = toguid(records.ParentId),
+            records
+        | extend properties = records.Properties
+        | where properties.span_type in ('LLM', "Embedding") 
+        | where properties.function in ('openai.resources.chat.completions.Completions.create', 'openai.resources.embeddings.Embeddings.create')
+        | extend Success = tostring(records.Success)
+        | extend Duration = toint(records.DurationMs)
+        | extend ModelName = tostring (properties.['llm.response.model'])
+        | extend Prompt = properties.inputs
+        | extend Output = properties['llm.generated_message']
+        | extend TotalTokens = toint(properties["llm.usage.total_tokens"])
+        | extend PromptTokens = toint(properties["llm.usage.prompt_tokens"])
+        | extend CompletionTokens = toint(properties["llm.usage.completion_tokens"])
+        | project EventTime, OperationId, ParentId, Success, Duration, Prompt, Output, ModelName, TotalTokens, PromptTokens, CompletionTokens
+      }
+  
+
+  
+    .create table 
+    OngoingUsage(EventTime: datetime, OperationId: guid, ParentId: guid , Success: string,  Duration:int,  Prompt:dynamic , Output:dynamic , ModelName: string , TotalTokens:int, PromptTokens:int, CompletionTokens:int)
+
+
+.alter table OngoingUsage policy update
+    @'[{ "IsEnabled": true, "Source": "traces", "Query": "OngoingUsageInsert()", "IsTransactional": true}]'
+
+.set-or-append OngoingUsage <|
+    OngoingUsageInsert()
+
+OngoingUsage
+
+
+
+
+//-  --- application details 
+
+      .create-or-alter function ApplicationDetailsInsert() {   
+        let ongoing_appl_expanded_table=
+         traces
+        | mv-expand records 
+        | where records.Type == 'AppDependencies';
+        ongoing_appl_expanded_table
+        | project
+            EventTime = todatetime(records["time"]),
+            OperationId = toguid(records.OperationId),
+            ParentId = tostring(records.ParentId),
+        records
+        | where records.Target == "RAG.__chat__" 
+        | extend ApplicationName = tostring(records.Properties.application_name)
+        | extend ApplicationVersion = tostring(records.Properties.application_version)
+        | extend SessionId = tostring(records.Properties.session_id)
+        | extend ConfigVersion = tostring(records.Properties.config_version)
+        | extend Deployment = tostring(records.Properties.endpoint)
+        | project EventTime, OperationId, ParentId, ApplicationName, ApplicationVersion, SessionId, ConfigVersion, Deployment}
+
+     
+    .create table 
+    ApplicationDetails (EventTime: datetime, OperationId: guid, ParentId: string, ApplicationName:string , ApplicationVersion:string ,SessionId:string , ConfigVersion:string, Deployment:string ) 
+
+.alter table ApplicationDetails policy update
+    @'[{ "IsEnabled": true, "Source": "traces", "Query": "ApplicationDetailsInsert()", "IsTransactional": true}]'
+
+.set-or-append ApplicationDetails <|
+    ApplicationDetailsInsert()   
+
+ApplicationDetails
+
+
+// create a join table
+
+.set-or-replace ApplicationUsage <|
+ApplicationDetails
+| join OngoingUsage on OperationId
+|project 
+    EventTime,
+    OperationId,
+    ParentId,
+    ApplicationName,
+    ApplicationVersion,
+    SessionId,
+    ConfigVersion,
+    Duration,
+    Success,
+    Prompt,
+    Output,
+    TotalTokens,
+    PromptTokens,
+    CompletionTokens,
+    ModelName, 
+    Deployment
+
+ApplicationUsage
+
+
+

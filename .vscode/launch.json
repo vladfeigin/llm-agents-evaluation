@@ -1,10 +1,9 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
         {
             "name": "Debug Evaluate Tool",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "multiagent_evaluation.agents.orchestrator.evaluation_orchestrator",
             "cwd": "${workspaceFolder}",

@@ -1,0 +1,30 @@
+.create-or-alter function SearchDetailsInsert() {   
+        let search_details_table=
+        opentel_traces
+        | mv-expand records 
+        | where records.Target == 'retrieve_documents.task'
+        | where records.Type == 'AppDependencies';
+        search_details_table
+        | project
+            EventTime = todatetime((records)["time"]),
+            OperationId = toguid(records.OperationId),
+            ParentId = tostring(records.ParentId),
+            records
+        | extend properties = records.Properties
+        | extend DurationMs = toint(records.DurationMs)
+        | extend SearchInput = properties.['traceloop.entity.input']
+        | extend SearchOutput = properties.['traceloop.entity.output']
+        | project EventTime, OperationId, ParentId, DurationMs, SearchInput, SearchOutput
+      }
+
+    .create table SearchDetails (EventTime: datetime, OperationId: guid, ParentId: string, DurationMs:int, SearchInput:dynamic , SearchOutput:dynamic )
+
+
+    .alter table SearchDetails policy update
+    @'[{ "IsEnabled": true, "Source": "opentel_traces", "Query": "SearchDetailsInsert()", "IsTransactional": true}]'
+
+.set-or-append SearchDetails <|
+    SearchDetailsInsert()
+
+
+SearchDetailsInsert

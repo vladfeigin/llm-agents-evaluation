@@ -1,0 +1,81 @@
+.create-or-alter function EvaluationMetricsFlowInsert() {
+     let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppTraces" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+    | project
+        EventTime = todatetime((item)["time"]),
+        OperationId = toguid(item.OperationId),
+        ParentId = tostring(item.ParentId),
+        Message = dynamic_to_json(item.Message)
+    | where Message has "batch-evaluation-flow-metrics"
+    | extend parsed_json = parse_json(Message)
+    | extend 
+        AgentName = tostring(parsed_json.metadata.AgentConfiguration.agent_name),		
+        ConfigVersion = tostring(parsed_json.metadata.AgentConfiguration.config_version),
+        ModelName = tostring(parsed_json.metadata.AgentConfiguration.deployment.model_name),
+        ModelVersion = tostring(parsed_json.metadata.AgentConfiguration.deployment.model_version),
+        ModelDeploymentName = tostring(parsed_json.metadata.AgentConfiguration.deployment.name),
+        OpenAIAPIVersion = tostring(parsed_json.metadata.AgentConfiguration.deployment.openai_api_version),
+        IntentSystemPrompt = tostring(parsed_json.metadata.AgentConfiguration.intent_system_prompt),
+        ChatSystemPrompt = tostring(parsed_json.metadata.AgentConfiguration.chat_system_prompt),
+        Deployment = tostring(parsed_json.metadata.AgentConfiguration.deployment.endpoint),
+        Temperature = tostring(parsed_json.metadata.AgentConfiguration.model_parameters.temperature),
+        Seed = tolong(parsed_json.metadata.AgentConfiguration.model_parameters.seed),
+        EmbeddingEndpoint = tostring(parsed_json.metadata.AgentConfiguration.retrieval.deployment.endpoint),
+        EmbeddingDeployment = tostring(parsed_json.metadata.AgentConfiguration.retrieval.deployment.name),
+        SearchType = tostring(parsed_json.metadata.AgentConfiguration.retrieval.parameters.search_type),
+        SearchTopK = tolong(parsed_json.metadata.AgentConfiguration.retrieval.parameters.top_k) 
+    | where isnotempty(AgentName)         
+    | mv-expand result = parsed_json.result
+    | extend metric = tostring(result.metric), score = toreal(result.score)
+    | project-away Message, parsed_json, result
+    | evaluate pivot(metric, any(score))
+    | sort by EventTime asc
+    | project
+        EventTime,
+        OperationId,
+        ParentId,
+        AgentName,
+        ConfigVersion,
+        ModelName,
+        ModelVersion,
+        ModelDeploymentName,
+        OpenAIAPIVersion,
+        Deployment,
+        Temperature,
+        Seed,
+        EmbeddingEndpoint,
+        EmbeddingDeployment,
+        SearchType,
+        SearchTopK,
+        IntentSystemPrompt,
+        ChatSystemPrompt,
+        Coherence = coherence,
+        Groundedness = groundedness,
+        Relevance = relevance,
+        Similarity = similarity
+ }
+   
+ 
+   .create table 
+    EvaluationMetrics (EventTime: datetime, OperationId: guid, ParentId: string, AgentName: string, ConfigVersion: string, ModelName: string, ModelVersion: string, ModelDeploymentName: string, OpenAIAPIVersion: string,
+    Deployment: string, Temperature: string, Seed: long, EmbeddingEndpoint:string, EmbeddingDeployment: string, SearchType: string, SearchTopK: long, IntentSystemPrompt: string, ChatSystemPrompt: string,
+    Coherence: real, Groundedness: real, Relevance: real, Similarity: real)
+
+//.drop table EvaluationMetrics
+
+.alter table EvaluationMetrics policy update
+    @'[{ "IsEnabled": true, "Source": "opentel_traces", "Query": "EvaluationMetricsFlowInsert()", "IsTransactional": true}]'
+
+.set-or-append EvaluationMetrics <|
+    EvaluationMetricsFlowInsert()
+
+
+EvaluationMetrics | take 10
+

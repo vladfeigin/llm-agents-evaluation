@@ -1,0 +1,49 @@
+.create-or-alter function EvaluationRawFlowInsert() {
+     let AppTracesTbl = 
+        opentel_traces
+        | extend item = parse_json(records)
+        | mv-expand item
+        | where item.Type == "AppTraces" 
+        | project
+            EventProcessedUtcTime,
+            item;
+     AppTracesTbl
+    | project
+        EventTime = todatetime((item)["time"]),
+        OperationId = toguid(item.OperationId),
+        ParentId = tostring(item.ParentId),
+        Message = dynamic_to_json(item.Message)
+    | where Message has "batch-evaluation-flow-raw"
+    | extend parsed_json = parse_json(Message)
+    | mv-expand result = parsed_json.result
+    | where result contains "question"
+    | extend 
+        SessionId = tostring(result["session_id"]),
+        Question = tostring(result["question"]),
+        GroundTruth = tostring(result["answer"]),
+        Context = tostring(result["context"]),
+        ModelAnswer = tostring(result["outputs.output"]),
+        Relevance = tolong(result["relevance"]),
+        Groundedness = tolong(result["groundedness"]),
+        Similarity = tolong(result["similarity"]),
+        Coherence = tolong(result["coherence"])
+    | project-away result,Message, parsed_json   
+ }
+   
+ 
+   .create table EvaluationRaw
+    (   EventTime: datetime, OperationId: guid, ParentId: string, SessionId:string, Question:string , GroundTruth:string , Context:string ,ModelAnswer:string , 
+    Relevance:long ,Groundedness:long , Similarity:long ,Coherence:long 
+)
+
+#.drop table EvaluationRaw
+
+.alter table EvaluationRaw policy update
+    @'[{ "IsEnabled": true, "Source": "opentel_traces", "Query": "EvaluationRawFlowInsert()", "IsTransactional": true}]'
+
+.set-or-append EvaluationRaw <|
+    EvaluationRawFlowInsert()
+
+
+EvaluationRaw | take 10
+
