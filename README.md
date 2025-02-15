@@ -173,14 +173,14 @@ For example, to run the evaluation for the RAG Agent, execute the following comm
 ```
 
 where the parameters are:
-    `agent_class`: LLM Agent main implementaion class.
-    `eval_fn`:   evaluation function implementation. This function calculates the evaluation metrics.
-    `config_dir`:  directory where the LLM Agent configuration file is located(more details in the next sections)
-    `config_file`: LLM Agent configuration file name.
-    `eval_dataset`:   evaluation data set.
-    `dump_output`: flag to dump the evaluation results to the output files.
-    `mode`:  evaluation mode (`single` or `multiple`). In the single mode, the evaluation is performed for a single LLM Agent configuration.
-                      In the multiple mode, the evaluation is performed for multiple configurations.
+
+   - `agent_class`: LLM Agent main implementation class.
+   - `eval_fn`: Evaluation function implementation. This function calculates the evaluation metrics.
+   - `config_dir`: Directory where the LLM Agent configuration file is located (more details in the next sections).
+   - `config_file`: LLM Agent configuration file name.
+   - `eval_dataset`: Evaluation data set.
+   - `dump_output`: Flag to dump the evaluation results to the output files.
+   - `mode`: Evaluation mode (`single` or `multiple`). In the single mode, the evaluation is performed for a single LLM Agent configuration. In the multiple mode, the evaluation is performed for multiple configurations.
 
 Running this command calculates the evaluation metrics for the evaluated agent (RAG Agent in this example) and output the results to the `batch_eval_results_timestamp.json` and `eval_results_timestamp.json` files in the project root folder and to console.
 
@@ -277,14 +277,14 @@ For example for RAG agent you can run the following command:
 ```
 
 where the parameters are:
-`--agent_class`: LLM Agent main implementaion class.
-`--eval_fn`:   evaluation function implementation. This function calculates the evaluation metrics for the agent.
-`--agent_config_file_dir`:  directory where the LLM Agent configuration file is located.
-`--agent_config_file_name`: LLM Agent configuration file.
-`--evaluation_dataset`:   evaluation data set.
-`--base_variant`:  base variant configuration file. This file contains the main configuration parameters which are used to generate multiple configurations.
-                 It contains the rules how to generate the parameters in configurations. This file is used by ./multiagent_evaluation/agents/tools/generate_variants.py script to generate multiple variants.
-`--output_dir`:  directory where the generated configurations are stored.
+
+- `--agent_class`: LLM Agent main implementation class.
+- `--eval_fn`: Evaluation function implementation. This function calculates the evaluation metrics for the agent.
+- `--agent_config_file_dir`: Directory where the LLM Agent configuration file is located.
+- `--agent_config_file_name`: LLM Agent configuration file.
+- `--evaluation_dataset`: Evaluation data set.
+- `--base_variant`: Base variant configuration file. This file contains the main configuration parameters which are used to generate multiple configurations. It contains the rules on how to generate the parameters in configurations. This file is used by `./multiagent_evaluation/agents/tools/generate_variants.py` script to generate multiple variants.
+- `--output_dir`: Directory where the generated configurations are stored.
 
 Here is example of base variant configuration file:
 
