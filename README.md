@@ -2,17 +2,17 @@
 
 ## Intro
 
-When developing LLM-based applications, common questions include:
+When developing LLM-based agents, common frequently asked questions are:
 
-1. How to evaluate their quality?
-2. How to monitor them?
-3. How to find the best model parameters and prompts?
+- How to evaluate agents quality?
+- How to monitor them?
+- How to find the best model parameters and prompts?
 
 This project offers a comprehensive framework, grounded in real-world production experience, for the evaluation and monitoring of LLM Agents.
 
 ## Project Description
 
-This project demonstrates the methodology of developing and evaluating LLM-based applications. It includes a conversational bot, the RAG Agent, which allows users to ask questions about their documents. The RAG Agent serves as an example of an LLM agent being evaluated.
+This project provides the framework of developing and evaluating LLM-based applications. It includes a conversational bot, the RAG Agent, which allows users to ask questions about their documents. The RAG Agent serves as an example of an LLM agent being evaluated.
 The project showcases effective methods for monitoring and evaluating LLM-based applications, with a strong emphasis on robust evaluation techniques.
 
 ### Project Structure And Modules
@@ -40,7 +40,7 @@ The project showcases effective methods for monitoring and evaluating LLM-based 
 - **Microsoft Fabric**: Observability and evaluation results analysis.
 - **Langchain**: Popular LLM framework with easy integrations with Azure AI Search and Azure Document Intelligence.
 
-**Note**: This project goal is demonstrating the methodology of developing and evaluating LLM-based applications and it uses RAG Agent just as an example.
+**Note**: This project goal is demonstrating the framework of developing and evaluating LLM-based applications and it uses RAG Agent just as an example.
 
 ## Evaluating LLM-Based Agents
 
@@ -50,7 +50,6 @@ When planning your evaluation strategy, start by preparing **evaluation data set
 The data sets emulate your actual interaction with LLM or with LLM based Agent.
 
 Keep these points in mind:
-
     - Domain experts should prepare the data sets.
     - Tailor the data set structure to your use case.
     - Start with a small size of 20-30 samples of your flow.
