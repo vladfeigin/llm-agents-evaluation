@@ -17,22 +17,20 @@ The project showcases effective methods for monitoring and evaluating LLM-based 
 
 ### Project Structure And Modules
 
-    -**multiagent_evaluation**: main project folder (root folder)
-    - **agents**: this folder contains LLM agents implementations.
-        - **rag**: RAG (Retrieval Augmented Generation) Agent implementation.
-            This agent serves as a conversational bot, allowing users to ask questions about their documents.
-            In this project, we use the RAG Agent to demonstate the evaluation and monitoring methods.
-        - **prompt_generator**: LLM Agent generating prompts for evaluations, with the goal to find the best performing one.
-        - **orchestrator**: Agent orchestrating the agents evaluations.
-        - **tools**: contains utilities for evaluation.
-    - **data_ingestion**: utility for uploading PDF documents and indexing them into Azure AI Search
-    -**aimodel**:  wrapper on top of LLM models
-    - **aisearch**: wrapper for search functionality. Integrates with Azure AI Search service as a search engine.
-    - **kusto_scripts**: Kusto (Azure Data Explorer) scripts for processing traces and logs.
-    - **msfabric**: Real-Time LLM evaluation dashboard and Kusto queries for constructing the dashboard.
-    - **session_store**: simple, in-memory session store for storing user sessions, used in the RAG Agent.
-    - **utils**: common utility functions.
-    - **docs**:  project documentation
+   - **multiagent_evaluation**: main project folder (root folder)
+      - **agents**: this folder contains LLM agents implementations.
+         - **rag**: RAG (Retrieval Augmented Generation) Agent implementation. This agent serves as a conversational bot, allowing users to ask questions about their documents. In this project, we use the RAG Agent to demonstrate the evaluation and monitoring methods.
+         - **prompt_generator**: LLM Agent generating prompts for evaluations, with the goal to find the best performing one.
+         - **orchestrator**: Agent orchestrating the agents' evaluations.
+         - **tools**: contains utilities for evaluation.
+      - **data_ingestion**: utility for uploading PDF documents and indexing them into Azure AI Search.
+      - **aimodel**: wrapper on top of LLM models.
+      - **aisearch**: wrapper for search functionality. Integrates with Azure AI Search service as a search engine.
+      - **kusto_scripts**: Kusto (Azure Data Explorer) scripts for processing traces and logs.
+      - **msfabric**: Real-Time LLM evaluation dashboard and Kusto queries for constructing the dashboard.
+      - **session_store**: simple, in-memory session store for storing user sessions, used in the RAG Agent.
+      - **utils**: common utility functions.
+      - **docs**: project documentation.
 
 #### Project Services and LLM Frameworks
 
