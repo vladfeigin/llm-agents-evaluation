@@ -12,35 +12,35 @@ This project offers a comprehensive framework, grounded in real-world production
 
 ## Project Description
 
-This project provides the framework of developing and evaluating LLM-based applications. It includes a conversational bot, the RAG Agent, which allows users to ask questions about their documents. The RAG Agent serves as an example of an LLM agent being evaluated.
+This project provides the framework of developing and evaluating LLM-based applications. It includes a conversational bot, the RAG Agent, which allows users to ask questions about the content in their documents. The RAG Agent serves as an example of an LLM agent being evaluated.
 The project showcases effective methods for monitoring and evaluating LLM-based applications, with a strong emphasis on robust evaluation techniques.
 
 ### Project Structure And Modules
 
-- **multiagent_evaluation**: main project folder (root folder)
-  - **agents**: this folder contains LLM agents implementations.
+- **multiagent_evaluation**: main project folder.
+  - **agents**: LLM agents implementations.
     - **rag**: RAG (Retrieval Augmented Generation) Agent implementation. This agent serves as a conversational bot, allowing users to ask questions about their documents. In this project, we use the RAG Agent to demonstrate the evaluation and monitoring methods.
-    - **prompt_generator**: LLM Agent generating prompts for evaluations, with the goal to find the best performing one.
+   - **prompt_generator**: This module generates various prompts for LLM Agent evaluations to find the most performing ones.
     - **orchestrator**: Agent orchestrating the agents' evaluations.
-    - **tools**: contains utilities for evaluation.
-  - **data_ingestion**: utility for uploading PDF documents and indexing them into Azure AI Search.
-  - **aimodel**: wrapper on top of LLM models.
-  - **aisearch**: wrapper for search functionality. Integrates with Azure AI Search service as a search engine.
+    - **tools**: Utilities for evaluation.
+  - **data_ingestion**: Utility for uploading PDF documents and indexing them into Azure AI Search.
+  - **aimodel**: Wrapper on top of LLM models.
+  - **aisearch**: Wrapper for search functionality. Integrates with Azure AI Search service as a search engine.
   - **kusto_scripts**: Kusto (Azure Data Explorer) scripts for processing traces and logs.
   - **msfabric**: Real-Time LLM evaluation dashboard and Kusto queries for constructing the dashboard.
-  - **session_store**: simple, in-memory session store for storing user sessions, used in the RAG Agent.
-  - **utils**: common utility functions.
-  - **docs**: project documentation.
+  - **session_store**: Simple, in-memory session store for storing user sessions, used in the RAG Agent.
+  - **utils**: Common utility functions.
+  - **docs**: Project documentation.
 
 #### Project Services and LLM Frameworks
 
-- **Azure AI Foundry**: Model deployments, playground, and manual evaluations.
+- **Azure AI Foundry**: Model deployments, playground, manual and automatic evaluations.
 - **Azure AI Search**: Retrieval engine.
 - **Azure Document Intelligence**: Documents semantic chunking.
 - **Microsoft Fabric**: Observability and evaluation results analysis.
 - **Langchain**: Popular LLM framework with easy integrations with Azure AI Search and Azure Document Intelligence.
 
-**Note**: This project goal is demonstrating the framework of developing and evaluating LLM-based applications and it uses RAG Agent just as an example.
+**Note**: This project goal is demonstrating the framework for developing and evaluating LLM-based applications, it uses RAG Agent just as an example.
 
 ## Evaluating LLM-Based Agents
 
@@ -51,12 +51,12 @@ The data sets emulate your actual interaction with LLM or with LLM based Agent.
 
 Keep these points in mind:
     - Domain experts should prepare the data sets.
-    - Tailor the data set structure to your use case.
+    - Tailor the data set to your use case.
     - Start with a small size of 20-30 samples of your flow.
     - Regularly update data sets with real production examples.
     - For a multi-agent system, create a dedicated data set for each agent.
 
-For example the evaluation data set for conversational flow, could have the following schema:
+For example the evaluation data set for conversational flow (chat), could have the following schema:
 
 **`question, answer, context, chat-history`**
 
@@ -98,13 +98,13 @@ In this project, we utilize the [Azure Evaluation SDK](https://learn.microsoft.c
 #### Automatic Evaluation Implementation
 
 Incorporate automatic evaluation into your project.
-The implementation depends on your flow. For conversational flows, another advanced model is typically needed for evaluation, the _judge_ model.
+The implementation depends on your flow. For conversational flows, another advanced LLM model is typically needed for evaluation, the _judge_ model.
 The project in this repo uses the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk) and [Azure AI Foundry Evaluator Library](http://ai.azure.com/), which offers ready prompts specifically designed for evaluations.
 Integrate automatic evaluations into your CI/CD pipeline. Fail the build if metrics drop below predefined quality thresholds.
 
 #### Agent Configuration
 
-The core of the evaluation and monitoring process is the concept of **_Agent Configuration_** or **_Variant_**. For each Agent, a configuration file in YAML format is created, encompassing all essential settings such as prompts, LLM, model parameters, and more. Any update to this configuration file results in a new revision. During the evaluation of the Agents, or during their ongoing usage, the current Agent configuration revision is recorded in the logs and traces. This practice enables the comparison of evaluation metrics for each Agent for each configuration revision, facilitating the assessment of how specific configuration revisions impact their performance. It is important to note that logs and traces are collected and analyzed within Microsoft Fabric, however you can use other services for this purpose.
+The core of the evaluation and monitoring process is the concept of **_Agent Configuration_** or **_Variant_**. For each Agent, a configuration file in YAML format is created, encompassing all essential settings such as prompts, LLM, model parameters, agent name, application name and more. Any update to this configuration file results in a new revision. During the evaluation of the Agents, or during their ongoing usage, the current Agent configuration revision is recorded in the logs and traces. This practice enables the comparison of evaluation metrics for each Agent for each configuration revision, facilitating the assessment of how specific configuration revisions impact their performance. It is important to note that logs and traces are collected and analyzed within Microsoft Fabric, however you can use other services for this purpose.
 
 Example of configuration file:
 
@@ -157,7 +157,7 @@ Run evalations during development and in CI/CD.
 For each LLM Agent implement a specific evaluation script.
 For example, in this project the evaluation script for the RAG Agent is  `./multiagent_evaluation/agents/rag/evaluation/evaluation_implementation.py`.
 This script uses the Azure Evaluation SDK to calculate the conversational evaluation metrics: Groundedness, Relevance, Similarity and Coherence.
-The script `./multiagent_evaluation/agents/tools/evaluate.py` is a generic script which runs specific LLM Agent evaluation implementation.
+The script `./multiagent_evaluation/agents/tools/evaluate.py` is a generic script which runs specific LLM Agent evaluation implementation on evaluation data sets.
 
 For example, to run the evaluation for the RAG Agent, execute the following command from the project root folder:
 
@@ -182,7 +182,7 @@ where the parameters are:
    - `dump_output`: Flag to dump the evaluation results to the output files.
    - `mode`: Evaluation mode (`single` or `multiple`). In the single mode, the evaluation is performed for a single LLM Agent configuration. In the multiple mode, the evaluation is performed for multiple configurations.
 
-Running this command calculates the evaluation metrics for the evaluated agent (RAG Agent in this example) and output the results to the `batch_eval_results_timestamp.json` and `eval_results_timestamp.json` files in the project root folder and to console.
+Running this command will first evaluate the agent on the provided evaluation data set, calculate the evaluation metrics for the evaluated agent (RAG Agent in this example), and output the results to the `batch_eval_results_timestamp.json` and `eval_results_timestamp.json` files in the project root folder, as well as to the console.
 
 Here is example of evaluation results file (eval_results_timestamp.json):
 
@@ -256,7 +256,7 @@ Example of ruuning the evaluation for multiple configurations:
   --mode multiple
 ```
 
-In `--mode` equals `multiple`, `--config_dir` points to the directory where the multiple agent configurations are stored.
+In `--mode` set to `multiple`, the `--config_dir` parameter specifies the directory where the multiple agent configurations are stored.
 
 #### Generating Multiple Agent Configurations
 
