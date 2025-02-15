@@ -9,6 +9,8 @@ Usage:
     python -m multiagent_evaluation.agents.orchestrator.evaluation_orchestrator
 """
 import json
+import argparse  
+import importlib  
 from typing import Tuple, Type, Callable
 import pandas as pd
 from multiagent_evaluation.agents.tools.evaluate import run_and_eval_flow, multi_variant_evaluation
@@ -20,6 +22,15 @@ PROMPT_GENERATOR_FOLDER = "agents/prompt_generator"
 PROMPT_GENERATIR_CONFIG_FILE = "prompt_generator_config.yaml"
 CONFIG_SCHEMA = "./agents/schemas/agent_config_schema.yaml"
 NUMBER_OF_VARIANTS_GENERATED = 100
+
+#Function to dynamically import a class or function
+def import_from_path(full_path: str):  
+    """
+    Dynamically import a class or function from its full module path.
+    """
+    module_path, attr_name = full_path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, attr_name)
 
 
 def find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFrame, bool], Tuple[pd.DataFrame, pd.DataFrame]], agent_config_file_dir: str, agent_config_file_name: str, evaluation_dataset: str, base_variant: str, output_dir: str = None):
@@ -67,11 +78,95 @@ def find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFram
     # TODO analyze the results and decide on the best agent /  best prompt or run more iteration
     return all_results
 
+#parse command-line arguments
+def parse_args(): 
+    """Parses command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Run agent evaluation orchestrator to find optimal configuration."
+    )
+    parser.add_argument(
+        "--agent_class",
+        type=str,
+        required=True,
+        help="Full module path and class name for the agent (e.g., multiagent_evaluation.agents.rag.rag_main.RAG)."
+    )
+    parser.add_argument(
+        "--eval_fn",
+        type=str,
+        required=True,
+        help="Full module path and function name for evaluation (e.g., multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch)."
+    )
+    parser.add_argument(
+        "--agent_config_file_dir",
+        type=str,
+        required=True,
+        help="Directory containing the agent configuration file."
+    )
+    parser.add_argument(
+        "--agent_config_file_name",
+        type=str,
+        required=True,
+        help="Name of the agent configuration file."
+    )
+    parser.add_argument(
+        "--evaluation_dataset",
+        type=str,
+        required=True,
+        help="Path to the dataset for evaluation."
+    )
+    parser.add_argument(
+        "--base_variant",
+        type=str,
+        required=True,
+        help="Path to the variant definitions JSON file."
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        required=True,
+        help="Directory where the generated configurations (variants) will be saved."
+    )
+    return parser.parse_args()
 
-if __name__ == "__main__":
-    from multiagent_evaluation.agents.rag.rag_main import RAG
-    from multiagent_evaluation.agents.rag.evaluation.evaluation_implementation import eval_batch
+#orchestrator can run as a script from CLI
 
-    all_res = find_optimal_agent_configuration(RAG, eval_batch, "agents/rag", "rag_agent_config.yaml", "./multiagent_evaluation/agents/rag/evaluation/data.jsonl",
-                                               "./multiagent_evaluation/agents/rag/variants.json",  "./agents/rag/evaluation/configurations/generated")
-    print("Evaluation completed successfully. Results>>>>>>: ", all_res)
+def main():  
+    args = parse_args()
+
+    # Dynamically load agent class and evaluation function
+    agent_class = import_from_path(args.agent_class)  # CHANGE: Using dynamic import
+    eval_fn = import_from_path(args.eval_fn)  # CHANGE: Using dynamic import
+
+    # Run the evaluation pipeline
+    results = find_optimal_agent_configuration(
+        agent=agent_class,
+        eval_fn=eval_fn,
+        agent_config_file_dir=args.agent_config_file_dir,
+        agent_config_file_name=args.agent_config_file_name,
+        evaluation_dataset=args.evaluation_dataset,
+        base_variant=args.base_variant,
+        output_dir=args.output_dir
+    )
+
+    print("Evaluation completed successfully. Results:", results)
+
+
+if __name__ == "__main__":  # CHANGE: Making the script command-line executable
+    main()
+
+
+
+
+""" Example of running the orchestrator for RAG agent:
+
+python -m multiagent_evaluation.agents.orchestrator.evaluation_orchestrator \
+    --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+    --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+    --agent_config_file_dir agents/rag \
+    --agent_config_file_name rag_agent_config.yaml \
+    --evaluation_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+    --base_variant ./multiagent_evaluation/agents/rag/variants.json \
+    --output_dir ./agents/rag/evaluation/configurations/generated
+
+
+"""

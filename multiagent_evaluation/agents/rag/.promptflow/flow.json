@@ -14,14 +14,6 @@
         "../..",
         "../../.env"
     ],
-    "sample": {
-        "inputs": {
-            "session_id": "1234",
-            "question": "What's Microsoft Fabric?",
-            "answer": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises",
-            "context": ""
-        }
-    },
     "entry": "rag_main:RAG",
     "environment": {
         "docker_image": "python:3.11-slim",

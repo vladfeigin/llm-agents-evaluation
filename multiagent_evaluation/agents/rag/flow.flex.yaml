@@ -13,20 +13,6 @@ additional_includes:
   - ../..
   - ../../.env
 
-
-#environment_variables:
-  #AZURE_OPENAI_API_KEY: "${openai-australia-east-303474.api_key}"
-  #AZURE_OPENAI_ENDPOINT: "${openai-australia-east-303474.api_base}"
-  # Include other environment variables as needed
-
-sample:
-  inputs:
-    session_id: "1234" 
-    question: "What's Microsoft Fabric?"
-    answer: "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises"
-    context: ""
-
-#entry: rag.rag_main:RAG
 entry: rag_main:RAG
 
 environment:

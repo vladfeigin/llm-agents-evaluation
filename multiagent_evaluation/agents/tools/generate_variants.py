@@ -8,8 +8,6 @@ based on:
   - a JSON file (variants.json) that specifies possible values or ranges of values,
     plus a new "active" attribute to skip certain items if active:false.    
 """
-
-import argparse
 import json
 import os
 import sys
@@ -20,41 +18,6 @@ import yaml
 from jsonschema import validate
 from multiagent_evaluation.utils.utils import load_agent_configuration
 
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Generate multiple YAML files from a base YAML schema and variants."
-    )
-    parser.add_argument(
-        "variants_json",
-        type=str,
-        help="Path to the variants.json file with the possible or range/set values."
-    )
-    parser.add_argument(
-        "schema_yaml",
-        type=str,
-        help="Path to the agent_config_schema.yaml file describing the schema."
-    )
-    parser.add_argument(
-        "--base_config_yaml",
-        type=str,
-        default=None,
-        help="Optional path to a base rag_agent_config.yaml template. "
-             "If not provided, a minimal base config is constructed."
-    )
-    parser.add_argument(
-        "--max_variants",
-        type=int,
-        default=100,
-        help="Maximum number of variants to generate."
-    )
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        default=".",
-        help="Output directory for generated YAML files."
-    )
-    return parser.parse_args()
 
 def load_schema(schema_path: str):
     with open(schema_path, "r", encoding="utf-8") as f:
@@ -414,7 +377,4 @@ def generate_variants( schema_yaml:str, agent_folder: str, agent_config_file: st
         valid_count += 1
 
     print(f"Done. Generated {valid_count} YAML files.")
-
-# Run from project root:
-# python -m multiagent_evaluation.agents.tools.generate-variants
 

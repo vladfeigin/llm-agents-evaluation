@@ -1,6 +1,6 @@
-# Methodology of developing and evaluation LLM-based applications 
+# Methodology of developing and evaluation LLM-based applications
 
-## Intro 
+## Intro
 
 When developing LLM-based applications, common questions include:
 
@@ -8,14 +8,48 @@ When developing LLM-based applications, common questions include:
 2. How to monitor them?
 3. How to find the best model parameters and prompts?
 
-This project provides best practices and real examples based on production experience for the aforementioned questions.
+This project provides a solution, best practices and real examples based on production experience for the aforementioned questions.
+
+## Project Description
+
+This project demonstrates the methodology of developing and evaluating LLM-based applications. It includes a conversational bot, the RAG Agent, which allows users to ask questions about their documents. The RAG Agent serves as an example of an LLM agent being evaluated.
+The project showcases effective methods for monitoring and evaluating LLM-based applications, with a strong emphasis on robust evaluation techniques.
+
+### Project Structure And Modules
+
+    -**multiagent_evaluation**: main project folder (root folder)
+    - **agents**: this folder contains LLM agents implementations.
+        - **rag**: RAG (Retrieval Augmented Generation) Agent implementation.
+            This agent serves as a conversational bot, allowing users to ask questions about their documents.
+            In this project, we use the RAG Agent to demonstate the evaluation and monitoring methods.
+        - **prompt_generator**: LLM Agent generating prompts for evaluations, with the goal to find the best performing one.
+        - **orchestrator**: Agent orchestrating the agents evaluations.
+        - **tools**: contains utilities for evaluation.
+    - **data_ingestion**: utility for uploading PDF documents and indexing them into Azure AI Search
+    -**aimodel**:  wrapper on top of LLM models
+    - **aisearch**: wrapper for search functionality. Integrates with Azure AI Search service as a search engine.
+    - **kusto_scripts**: Kusto (Azure Data Explorer) scripts for processing traces and logs.
+    - **msfabric**: Real-Time LLM evaluation dashboard and Kusto queries for constructing the dashboard.
+    - **session_store**: simple, in-memory session store for storing user sessions, used in the RAG Agent.
+    - **utils**: common utility functions.
+    - **docs**:  project documentation
+
+#### Project Services and LLM Frameworks
+
+- **Azure AI Foundry**: Model deployments, playground, and manual evaluations.
+- **Azure AI Search**: Retrieval engine.
+- **Azure Document Intelligence**: Documents semantic chunking.
+- **Microsoft Fabric**: Observability and evaluation results analysis.
+- **Langchain**: Popular LLM framework with easy integrations with Azure AI Search and Azure Document Intelligence.
+
+**Note**: This project goal is demonstrating the methodology of developing and evaluating LLM-based applications and it uses RAG Agent just as an example.
 
 ## Methodology Steps
 
-#### Evaluation Datasets 
+#### Evaluation Datasets
 
-When planning your evaluation strategy, start by preparing **evaluation datasets**. 
-The datasets emulate your actual interaction with LLM or with LLM based Agent.
+When planning your evaluation strategy, start by preparing **evaluation data sets**.
+The data sets emulate your actual interaction with LLM or with LLM based Agent.
 
 Keep these points in mind:
 
@@ -23,7 +57,7 @@ Keep these points in mind:
     - Tailor the data set structure to your use case.
     - Start with a small size of 20-30 samples of your flow.
     - Regularly update data sets with real production examples.
-    - For a multi-agent system, create a dedicated dataset for each agent.
+    - For a multi-agent system, create a dedicated data set for each agent.
 
 For example the evaluation data set for conversational flow, could have the following schema:
 
@@ -35,9 +69,10 @@ For example the evaluation data set for conversational flow, could have the foll
 
 `answer` is the expected answer.
 
-`context` is the context for the question, retrieved from the search index.
+`context` is the background information related to the question, serving as the ground-truth for the model to generate an accurate answer.
 
 Example:
+
 ```json
 {
     "session_id": "1",
@@ -49,57 +84,32 @@ Example:
 
 #### Manual Evaluation
 
-With an evaluation dataset, you already can perform manual evaluations to validate the LLM, model parameters, and prompts. This process helps ensure your idea works and is crucial step in developing LLM-based applications. 
-Azure AI Foundry offers a Manual Evaluation tool. 
+With an evaluation data set, you already can perform manual evaluations to validate the LLM, model parameters, and prompts. This process helps ensure your idea works and this is important step in developing LLM-based applications.
+Azure AI Foundry offers a Manual Evaluation tool.
 
-#### Evaluation Metrics 
+#### Evaluation Metrics
 
 Decide about evaluation metrics you want to measure.
-
+The relevant metrics for a evaluation depend on your use case.
+Consider assigning greater weights to more significant metrics according to your workflow.
+Calculate an aggregated score using these weights.
+In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
 For conversational flows, consider using metrics such as **`relevancy`**, **`similarity`**, and **`groundedness`**.
 For summarization tasks it could be **`similarity`** metric.
-The relevant metrics for a evaluation depend on your use case.
-Consider assigning greater weights to more significant metrics according to your workflow. 
-Calculate an aggregated score using these weights.
-For instance, if standard phrasing is crucial in a model output, give higher weight to the similarity metric comparing ground truth and model answers.
-In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
 In this project, we utilize the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk), which includes a variety of built-in evaluation metrics.
-
 
 #### Automatic Evaluation Implementation
 
 Incorporate automatic evaluation into your project.
-The implementation depends on your flow. For conversational flows, another advanced model is typically needed for evaluation, the judge model.
+The implementation depends on your flow. For conversational flows, another advanced model is typically needed for evaluation, the _judge_ model.
 The project in this repo uses the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk) and [Azure AI Foundry Evaluator Library](http://ai.azure.com/), which offers ready prompts specifically designed for evaluations.
 Integrate automatic evaluations into your CI/CD pipeline. Fail the build if metrics drop below predefined quality thresholds.
 
-#### Running Evaluations
-
-Run evalations during development and in CI/CD.
-In this project, we use the [Azure AI Foundry Prompt Flow SDK](https://github.com/microsoft/promptflow) to run automatic evaluations on the evaluation data set.
-
-
-#### Monitoring 
-
-Monitoring is a crucial part of any LLM-based project. It should be designed and implemented from the beginning, rather than postponed to the final phases. 
-In this project, we collect data from the RAG Agent, including tokens, model parameters, and evaluation metrics. This data is crucial for cost calculations and quality analysis of LLM-based applications, helping determine the impact of changes like prompts, model parameters, or models on application quality.
-In this project, we use the [promptflow-tracing](https://pypi.org/project/promptflow-tracing/) package to collect application traces. 
-Prompt Flow tracing follows the Open Telemetry Standard.
-Collect the traces and logs for further analysis. In this project, we use Microsoft Fabric for this purpose.
-
-
-#### Local Development
-
-To facilitate local development, we utilize Visual Studio Code. The Prompt Flow extension in VS Code simplifies several aspects of local development. For instance, it offers tools to run RAG locally and collects Open Telemetry traces on a local level. 
-It is also worth mentioning that we use the [Prompt Flow Flex](https://microsoft.github.io/promptflow/tutorials/flex-flow-quickstart.html) flavor, which provides comprehensive development flexibility.
-
 #### Agent Configuration
 
-For each Agent, we create a configuration file in YAML format, which includes all mandatory settings such as prompts, LLM, model parameters, and more. Any modification to this configuration file results in a new revision. During the evaluation of the Agents, we record the current revisions in the logs and traces.
-Logs are collected and analyzed in Microsoft Fabric.
-This allows us to compare the evaluation metrics for each Agent and determine how specific configuration revisions affect their performance.
-Example of configuration file:
+The core of the evaluation and monitoring process is the concept of **_Agent Configuration_** or **_Variant_**. For each Agent, a configuration file in YAML format is created, encompassing all essential settings such as prompts, LLM, model parameters, and more. Any update to this configuration file results in a new revision. During the evaluation of the Agents, or during their ongoing usage, the current Agent configuration revision is recorded in the logs and traces. This practice enables the comparison of evaluation metrics for each Agent for each configuration revision, facilitating the assessment of how specific configuration revisions impact their performance. It is important to note that logs and traces are collected and analyzed within Microsoft Fabric, however you can use other services for this purpose.
 
+Example of configuration file:
 
 ```yaml
 AgentConfiguration:
@@ -107,7 +117,7 @@ AgentConfiguration:
     config_version: 1.1
     application_version: "1.0"   
     application_name: "rag_llmops_workshop" 
-    
+  
     agent_name: "rag_agent"
     model_name: "gpt-4o-mini"
     model_version: "2024-08-01"
@@ -116,7 +126,7 @@ AgentConfiguration:
 
     model_deployment: "gpt-4o-mini"
     model_deployment_endpoint: "https://openai-australia-east.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview"
-    
+  
     retrieval: 
             search_type: "hybrid"
             top_k: 5
@@ -138,44 +148,266 @@ AgentConfiguration:
                 Deliver concise and clear answers, emphasizing the main points of the user’s query.
                 Your responses should be based exclusively on the context provided in the prompt; do not incorporate external knowledge.
                 If the provided context is insufficient to answer the question, request additional information.
-                        
+      
                 <context>
                 {context}
                 </context>"
 ```
 
-## Project Description
+#### Running Evaluations
 
-Users ingests their documents into an Azure AI Search index and interact with them using the RAG Agent. This allows users to ask questions about the ingested documents, leveraging the provided RAG Agent.
-The primary objective of the project is to illustrate the methods for monitoring and evaluating LLM-based applications. It showcases the functionality of Retrieval Augmented Generation (RAG), placing emphasis on monitoring and evaluation while also addressing certain aspects of local development.
+Run evalations during development and in CI/CD.
+For each LLM Agent implement a specific evaluation script.
+For example, in this project the evaluation script for the RAG Agent is  `./multiagent_evaluation/agents/rag/evaluation/evaluation_implementation.py`.
+This script uses the Azure Evaluation SDK to calculate the conversational evaluation metrics: Groundedness, Relevance, Similarity and Coherence.
+The script `./multiagent_evaluation/agents/tools/evaluate.py` is a generic script which runs specific LLM Agent evaluation implementation.
 
+For example, to run the evaluation for the RAG Agent, execute the following command from the project root folder:
 
-#### Project Modules
+```sh
+    python -m multiagent_evaluation.agents.tools.evaluate \
+    --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+    --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+    --config_dir agents/rag \
+    --config_file rag_agent_config.yaml \
+    --eval_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+    --dump_output
+    --mode single
+```
 
-- **aimodel**: A wrapper on top of LLM models.
-- **aisearch**: A wrapper for search functionality utilizing the Azure AI Search service.
-- **evaluation**: This module calculates conversation metrics such as Groundedness, Relevance, Similarity, and Coherence using the Azure Evaluation SDK.
-- **rag**: Implements the RAG agent, the project's core component. This is a conversational bot, allowing you to ask questions on top of your documents.
-- **data_ingestion**: A utility that allows uploading PDF documents and indexing them into Azure AI Search. The RAG Agent uses AI Search to retrieve relevant context for each user question. This module uses the Azure Document Intelligence service to semantically chunk the PDF documents and convert the chunks into Markdown language for indexing in Azure AI Search.
-- **msfabric**: This module encompasses a Real-Time LLM evaluation dashboard and KQL (Kusto Query Language) queries utilized for constructing the dashboard.
-- **docs**: Project documentation.
+where the parameters are:
+    `agent_class`: LLM Agent main implementaion class.
+    `eval_fn`:   evaluation function implementation. This function calculates the evaluation metrics.
+    `config_dir`:  directory where the LLM Agent configuration file is located(more details in the next sections)
+    `config_file`: LLM Agent configuration file name.
+    `eval_dataset`:   evaluation data set.
+    `dump_output`: flag to dump the evaluation results to the output files.
+    `mode`:  evaluation mode (`single` or `multiple`). In the single mode, the evaluation is performed for a single LLM Agent configuration.
+                      In the multiple mode, the evaluation is performed for multiple configurations.
 
+Running this command calculates the evaluation metrics for the evaluated agent (RAG Agent in this example) and output the results to the `batch_eval_results_timestamp.json` and `eval_results_timestamp.json` files in the project root folder and to console.
 
-#### Project Services and LLM Frameworks 
+Here is example of evaluation results file (eval_results_timestamp.json):
 
-- **Azure AI Foundry**: Model deployments, playground, and manual evaluations.
-- **Azure AI Search**: Retrieval engine.
-- **Azure Document Intelligence**: Documents semantic chunking.
-- **Microsoft Fabric**: Observability and evaluation results analysis.
-- **Langchain**: Popular LLM framework with easy integrations with Azure AI Search and Azure Document Intelligence.
+```json
+{
+    "session_id": 1,
+    "question": "What's Microsoft Fabric?",
+    "answer": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses various services such as Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. Fabric integrates these components into a cohesive stack, simplifying analytics requirements by offering a seamlessly integrated, user-friendly platform. Key features: Unified data storage with OneLake, AI capabilities embedded within the platform, Centralized data management and governance,SaaS model.",
+    "context": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses data movement, processing, ingestion, transformation, real-time event routing, and report building. It offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. With Fabric, you don't need to assemble different services from multiple vendors. Instead, it offers a seamlessly integrated, user-friendly platform that simplifies your analytics requirements. Operating on a Software as a Service (SaaS) model, Fabric brings simplicity and integration to your solutions.",
+    "outputs.output": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises requiring a unified solution. It encompasses data movement, processing, ingestion, transformation, real-time event routing, and report building. Fabric offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases.\n\nIt operates on a Software as a Service (SaaS) model, providing a seamlessly integrated, user-friendly platform that simplifies analytics requirements. Microsoft Fabric integrates separate components into a cohesive stack, centralizing data storage with OneLake, and includes embedded AI capabilities to eliminate manual integration. This allows users to transition raw data into actionable insights easily.\n\nFabric combines both new and existing components from Power BI, Azure Synapse Analytics, Azure Data Factory, and more into a unified environment tailored for customized user experiences. It integrates workloads such as Data Engineering, Data Factory, Data Science, Data Warehouse, Real-Time Intelligence, and Power BI into a shared SaaS foundation, ensuring unified management, governance, and discovery across all services.",
+    "relevance": 5.0,
+    "groundedness": 3.0,
+    "similarity": 5.0,
+    "coherence": 4.0
+}
+{
+    "session_id": 2,
+    "question": "What is OneLake in Microsoft Fabric?",
+    "answer": "OneLake in Microsoft Fabric is a unified storage system built on Azure Data Lake Storage (ADLS) Gen2. It provides a single SaaS experience and a tenant-wide store for data, serving both professional and citizen developers. OneLake simplifies data management by eliminating the need for understanding infrastructure concepts such as resource groups, RBAC, Azure Resource Manager, redundancy, or regions. It ensures easy data discovery, sharing, and uniform enforcement of policy and security settings, eliminating data silos.",
+    "context": "Microsoft Fabric integrates separate components into a cohesive stack. Instead of relying on different databases or data warehouses, you can centralize data storage with OneLake. AI capabilities are seamlessly embedded within Fabric, eliminating the need for manual integration. With Fabric, you can easily transition your raw data into actionable insights for business users. OneLake provides the data storage backbone for Fabric, bringing together data from multiple sources.",
+    "outputs.output": "OneLake is the data lake that serves as the foundation for all workloads within Microsoft Fabric. It is built into the Fabric platform and provides a unified location to store all organizational data, simplifying the management of data across the organization. Here are the key points about OneLake:\n\n1. **Built on ADLS Gen2**: OneLake is built on Azure Data Lake Storage (ADLS) Gen2, providing a single Software as a Service (SaaS) experience.\n\n2. **Single Tenant**: There is only one OneLake per tenant, which offers a single-pane-of-glass file-system namespace that spans across users, regions, and clouds.\n\n3. **Hierarchy and Management**: OneLake is hierarchical, allowing you to create multiple workspaces (akin to folders) within a tenant, and each workspace can contain multiple lakehouses (collections of files, folders, and tables).\n\n4. **Data Centralization**: It eliminates data silos created by individual developers, providing a unified storage system that ensures easy data discovery, sharing, and uniform enforcement of policy and security settings.\n\n5. **Integration with Microsoft Fabric**: All Microsoft Fabric compute experiences are prewired to use OneLake as their native store, which means no extra configuration is needed.\n\n6. **Shortcuts Feature**: OneLake allows for instant mounting of existing Platform as a Service (PaaS) storage accounts and facilitates data sharing without the need to move or duplicate information.\n\nOverall, OneLake simplifies the analytics and data management processes within Microsoft Fabric by providing a centralized and integrated storage solution.",
+    "relevance": 5.0,
+    "groundedness": 3.0,
+    "similarity": 5.0,
+    "coherence": 4.0
+    ....
+}
+```
 
+*outputs.output* field is the generated answer by the LLM Agent followed by the evaluation metrics.
+Note that outputs.output and evaluation metrics are added on top of the original evaluation data set.
+
+In addition to the evaluation results, the script outputs the aggregated evaluation metrics for the evaluated agent in a file named `batch_eval_output_timestamp.json` in the project root folder.
+Here is an example of the aggregated evaluation metrics file:
+
+```json
+{
+    "metric": "relevance",
+    "score": 5.0
+}
+{
+    "metric": "groundedness",
+    "score": 3.2
+}
+{
+    "metric": "similarity",
+    "score": 4.4
+}
+{
+    "metric": "coherence",
+    "score": 4.6
+}
+```
+
+#### Multiple Configurations Evaluations
+
+You can evaluate many agent configurations (variants) at once by running the evaluation script with the `mode` parameter set to `multiple`.
+This allows you to compare the evaluation metrics for each configuration and determine how specific configuration affects the agent performance and select the best performing one.
+The agent configuration is stored in YAML file and contains all important agent parameters such as prompts, LLM, model parameters, and more.
+For example RAG agent configuration is stored in `./multiagent_evaluation/agents/rag/rag_agent_config_example.yaml` file.
+When we instantiate an agent, we pass the configuration file to the agent constructor, this way at any given time we know which configuration is used for the agent. Moreover, we log the configuration revision in the logs and traces for each evaluation. This allows us to compare the evaluation metrics for each agent and determine how specific configuration revisions affect their performance.
+
+Example of ruuning the evaluation for multiple configurations:
+
+```sh
+    python -m multiagent_evaluation.agents.tools.evaluate \
+  --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+  --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+  --config_dir agents/rag/evaluation/configurations/generated \
+  --eval_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+  --mode multiple
+```
+
+In `--mode` equals `multiple`, `--config_dir` points to the directory where the multiple agent configurations are stored.
+
+#### Generating Multiple Agent Configurations
+
+You can generate multiple agent configurations (variants) and evaluate them to find the best performing one by running the evaluation orchestrator: `.\multiagent_evaluation\agents\orchestrator\evaluation_orchestrator`
+This script generates multiple agent configurations based on the base variant configuration file and evaluates them.
+
+For example for RAG agent you can run the following command:
+
+```sh
+    python -m multiagent_evaluation.agents.orchestrator.evaluation_orchestrator \
+    --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+    --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+    --agent_config_file_dir agents/rag \
+    --agent_config_file_name rag_agent_config.yaml \
+    --evaluation_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+    --base_variant ./multiagent_evaluation/agents/rag/variants.json \
+    --output_dir ./agents/rag/evaluation/configurations/generated
+```
+
+where the parameters are:
+`--agent_class`: LLM Agent main implementaion class.
+`--eval_fn`:   evaluation function implementation. This function calculates the evaluation metrics for the agent.
+`--agent_config_file_dir`:  directory where the LLM Agent configuration file is located.
+`--agent_config_file_name`: LLM Agent configuration file.
+`--evaluation_dataset`:   evaluation data set.
+`--base_variant`:  base variant configuration file. This file contains the main configuration parameters which are used to generate multiple configurations.
+                 It contains the rules how to generate the parameters in configurations. This file is used by ./multiagent_evaluation/agents/tools/generate_variants.py script to generate multiple variants.
+`--output_dir`:  directory where the generated configurations are stored.
+
+Here is example of base variant configuration file:
+
+```json
+{
+   
+        "deployment": [
+            {
+                "name": "gpt-4o-mini",
+                "model_name": "gpt-4o-mini",
+                "model_version": "2024-08-01",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            },
+            {
+                "name": "gpt-4o-3",
+                "model_name": "gpt-4o",
+                "model_version": "2024-08-01",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            },
+            {
+                "name": "gpt-4o-2",
+                "model_name": "gpt-4o",
+                "model_version": "2024-05-13",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-4o-2/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            },
+            {
+                "name": "gpt-35-turbo-0301",
+                "model_name": "gpt-35-turbo",
+                "model_version": "0301",
+                "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/gpt-35-turbo-0301/chat/completions?api-version=2024-10-01-preview",
+                "openai_api_version": "2024-10-01-preview"
+            }
+        ],
+        "model_parameters": [
+            {
+                "name": "temperature",
+                "range": [0.0, 1.0],
+                "step": 0.5,
+                "default": 0.0,
+                "active": "true"
+            },
+            {
+                "name": "top_p",
+                "range": [0.1, 0.9],
+                "step": 0.5,
+                "default": 0.9,
+                "active": false
+            },
+            {
+                "name": "frequency_penalty",
+                "range": [0.0, 1.0],
+                "step": 0.5,
+                "default": 0.0,
+                "active": false
+            },
+            {
+                "name": "presence_penalty",
+                "range": [0.0, 1.0],
+                "step": 0.5,
+                "default": 0.0,
+                "active": false
+            }
+        ],
+        "retrieval": {
+            "parameters": [
+                {
+                    "name": "search_type",
+                    "set": ["hybrid", "similarity"],
+                    "default": "hybrid"
+                },
+                {
+                    "name": "top_k",
+                    "range": [3, 5],
+                    "step": 2,
+                    "default": 5
+                }
+            ],
+            "deployment": [
+                {
+                    "model_name": "text-embedding-ada-002",
+                    "model_version": "2024-08-01",
+                    "openai_api_version": "2024-10-01-preview",
+                    "name": "text-embedding-ada-002",
+                    "endpoint": "https://<aoai-instance-name>.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15"
+                }
+            ]
+        },
+        "intent_system_prompt": "Your task is to extract the user’s intent by reformulating their latest question into a standalone query that is understandable without prior chat history. Analyze the conversation to identify any contextual references in the latest question, and incorporate necessary details to make it self-contained. Ensure the reformulated question preserves the original intent. Do not provide an answer; only return the reformulated question. For example, if the latest question is ‘What about its pricing?’ and the chat history discusses Microsoft Azure, reformulate it to ‘What is the pricing of Microsoft Azure?’",
+        "chat_system_prompt": "You are a knowledgeable assistant specializing only in technology domain. Deliver concise and clear answers, emphasizing the main points of the user’s query. Your responses should be based exclusively on the context provided in the prompt; do not incorporate external knowledge. If the provided context is insufficient to answer the question, request additional information.\n\n<context>\n{context}\n</context>",
+        "human_template": "question: {input}"
+}
+```
+
+After running the evaluation orchestrator, you will have evaluation results for each configuration file.
+For example, here you can see top 5 most performing configurations after running the evaluation orchestrator:
+
+![Multiple Agent Configuration Evaluation](multiagent_evaluation/docs/img/Multiple-variants-evaluation-dashboard.png)
+
+#### Monitoring
+
+Monitoring is a crucial part of any LLM-based project. It should be designed and implemented from project beginning, rather than postponed to the final phases.
+In this project, we collect data from the RAG Agent, including tokens consumption, model parameters, and evaluation metrics. This data is crucial for cost calculations and quality analysis of LLM-based applications, helping determine the impact of changes like prompts, model parameters, model versions on application quality.
+In this project, we use the Open Telemetry standard to collect application traces, logs and metrics.
+Traces, logs and metrics are collected in Microsoft Fabric for further analysis and reporting.
+In the next version, we plan to introduce support for Azure Data Explorer for storing and analyzing traces, logs, and metrics.
+
+#### Local Development
+
+To facilitate local development, we utilize Visual Studio Code. The Prompt Flow extension in VS Code simplifies several aspects of local development. For instance, it offers tools to run RAG locally providing a simple web interface for chat.
+Havind said that, Prompt Flow is not mandatory for this project.
 
 #### Architecture
 
 ![Architecture](multiagent_evaluation/docs/img/architecture.png)
 
-
 #### Prerequisites
+
 - **Azure AI Foundry project**
 - **Azure AI Search service instance**
 - **Azure Document Intelligence service instance**
@@ -184,36 +416,38 @@ The primary objective of the project is to illustrate the methods for monitoring
 - **Python 3.11** (The project has been tested with Python version 3.11 on Mac)
 
 #### Project Installation
-1. Clone the project from GitHub:
-    ```sh
-    git clone https://github.com/vladfeigin/llm-agents-evaluation.git
-    ```
 
-2. Create a project folder and navigate to it:
-    ```sh
-    cd llm-agents-evaluation
-    ```
+1. Create a project folder and navigate to it:
 
+   ```sh
+   mkdir llm-agents-evaluation
+   cd llm-agents-evaluation
+   ```
+2. Clone the project from GitHub:
+
+   ```sh
+   git clone https://github.com/vladfeigin/llm-agents-evaluation.git
+   ```
 3. Create a virtual environment in the root project folder:
-    ```sh
-    python3.11 -m venv .venv
-    ```
 
+   ```sh
+   python3.11 -m venv .venv
+   ```
 4. Activate the virtual environment:
-    ```sh
-    source .venv/bin/activate
-    ```
 
+   ```sh
+   source .venv/bin/activate
+   ```
 5. Install dependencies:
-    ```sh
-    pip install -r ./requirements.txt
-    ```
 
+   ```sh
+   pip install -r ./requirements.txt
+   ```
 6. Create a `.env` file from the `.env_template` file located in the project root folder:
-    ```sh
-    cp .env_template .env
-    ```
 
+   ```sh
+   cp .env_template .env
+   ```
 7. Populate the `.env` file with values pertinent to your environment.
 
 #### Ingest your documents to search index
@@ -221,46 +455,53 @@ The primary objective of the project is to illustrate the methods for monitoring
 In this step, you will ingest your PDF documents to a new Azure AI Search index.
 
 1. Copy the PDF files into a local folder.
-2. Change the directory to the project’s data_ingestion folder.
-3. Run: 
-    ```sh
-    python semantic_chunking_di.py --index_name <index name> --input_folder <folder name with the documents>
-    ```
-After ingestion, open Azure AI Search and verify the new index is created correctly and contains your documents.
+2. Change the directory to the project’s folder (`llm-agents-evaluation`).
+3. Run:
+   ```sh
+   python -m multiagent_evaluation.data_ingestion.semantic_chunking_di --index_name <my index name> --input_folder <my input folder>
+   ```
+
+After ingestion, open Azure AI Search in Azure portal and verify the new index is created correctly and contains your documents.
 
 #### Running RAG Agent locally
 
 1. Change the directory to the project root folder.
 2. In `./multiagent_evaluation/agents/rag/rag_agent_config.yaml`, change the search index name to the newly created index name from the previous step.
 3. From the command line, run:
-    ```sh
-    pf flow serve --source ./multiagent_evaluation/agents/rag/ --port 8080 --host localhost
-    ```
-    This will open a chat web interface. Now you can ask questions about the ingested documents.
+
+   ```sh
+   pf flow serve --source ./multiagent_evaluation/agents/rag/ --port 8080 --host localhost
+   ```
+
+   This will open a chat web interface. Now you can ask questions about the ingested documents.
 
  ![PF_WebUI](multiagent_evaluation/docs/img/rag_evaluation_web_chat_ui.png)
 
+4. Open Microsoft Fabric Real-Time dashboard. Select Ongoing Page and see the details of using RAG agent.
 
-4. Open Prompt Flow local traces: `http://localhost:23337/v1.0/ui/traces/` generated by the previous step.
-
-    ![PF_Trace1](multiagent_evaluation/docs/img/promptflow_traces-1.png)
-    
-    ![PF_Trace2](multiagent_evaluation/docs/img/promptflow_traces-2.png)
-
-
-5. Open Microsoft Fabric Real-Time dashboard. Select Ongoing Page and see the details of using RAG agent.
-
-    ![Fabric_Ongoing](multiagent_evaluation/docs/img/Fabric_ongoing.png)
-
+   ![Fabric_Ongoing](multiagent_evaluation/docs/img/Fabric_ongoing.png)
 
 #### Running RAG Agent evaluation
-1. Replace the `./rag/data.json` file with your relevant dataset. This dataset is for RAG Agent evaluation.
-2. Once you have created a relevant dataset, **from the project root folder**, execute the command from the command line:
-    ```sh
-    python -m multiagent_evaluation.agents.rag.evaluation.evaluate
-    ```
-Open Microsoft Fabric Real-Time dashboard. Select Evaluation Page and see the evaluation results.
 
+1. Replace the `./rag/data.json` file with your relevant dataset. This dataset is for RAG Agent evaluation.
+2. Once you have created a relevant dataset, **from the project root folder**, execute from the command line:
+
+   ```sh
+    python -m multiagent_evaluation.agents.tools.evaluate \
+    --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+    --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+    --config_dir agents/rag \
+    --config_file rag_agent_config.yaml \
+    --eval_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+    --dump_output
+    --mode single
+   ```
+
+If you have your own LLM Agent implementation, replace the `--agent_class` parameter with your LLM Agent main implementation class.
+Replace the `--eval_fn` parameter with your evaluation function implementation.
+Change other parameters according to your LLM Agent implementation.
+
+Open Microsoft Fabric Real-Time dashboard. Select Evaluation Page and see the evaluation results.
 
 ![Fabric_Evaluation](multiagent_evaluation/docs/img/Fabric_evaluation.png)
 
@@ -274,12 +515,23 @@ You also have a detailed view of the evaluation results, which can help investig
 
 ![Fabric_evaluation_detailed_1](multiagent_evaluation/docs/img/Fabric_evaluation_detailed_1.png)
 
-
 ![Fabric_evaluation_detailed_2](multiagent_evaluation/docs/img/Fabric_evaluation_detailed_2.png)
 
+3. Run multiple configurations evaluation to find best performing configuration with evaluation orchestrator:
+
+   ```sh
+    python -m multiagent_evaluation.agents.orchestrator.evaluation_orchestrator \
+    --agent_class multiagent_evaluation.agents.rag.rag_main.RAG \
+    --eval_fn multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch \
+    --agent_config_file_dir agents/rag \
+    --agent_config_file_name rag_agent_config.yaml \
+    --evaluation_dataset ./multiagent_evaluation/agents/rag/evaluation/data.jsonl \
+    --base_variant ./multiagent_evaluation/agents/rag/variants.json \
+    --output_dir ./agents/rag/evaluation/configurations/generated
+   ```
+
+   Change parameters according to your LLM Agent implementation.
 
 ### Observability with Microsoft Fabric
 
-![Fabric Observability Document][def]
-
-[def]: multiagent_evaluation/docs/Fabric%20Observability.md
+![Fabric Observability Document](multiagent_evaluation/docs/Fabric%20Observability.md)

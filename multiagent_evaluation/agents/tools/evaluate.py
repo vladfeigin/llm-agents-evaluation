@@ -266,13 +266,14 @@ def main():
     parser.add_argument(
         "--dump_output",
         action="store_true",
-        help="If provided, the evaluation output will be dumped to a JSON file."
+        default=False, 
+        help="If provided, the evaluation output will be dumped to a JSON files."
     )
     parser.add_argument(
         "--mode",
         choices=["single", "multiple"],
         default="single",
-        help="Evaluation mode: 'single' uses run_and_eval_flow; 'multiple' uses multi_variant_evaluation."
+        help="Evaluation mode: 'single' for single agent configuration ; 'multiple' for multiple agent configurations."
     )
     args = parser.parse_args()
 
@@ -301,28 +302,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-
-
-"""
-if __name__ == "__main__":
-
-    # Evaluate the RAG agent
-    from multiagent_evaluation.agents.rag.rag_main import RAG
-    # Specific implementation of the evaluation function for the RAG agent
-    from multiagent_evaluation.agents.rag.evaluation.evaluation_implementation import eval_batch
-
-    # -----------------------------------------------------------
-    # single variant run:
-    # -----------------------------------------------------------
-    all_results = run_and_eval_flow(RAG, eval_batch, "agents/rag", "rag_agent_config.yaml",
-                      "./multiagent_evaluation/agents/rag/evaluation/data.jsonl", dump_output=True)
-
-    # -----------------------------------------------------------
-    # multiple variants run:
-    # -----------------------------------------------------------
-    #all_results = multi_variant_evaluation(RAG, eval_batch, "agents/rag/evaluation/configurations/generated",
-    # "./multiagent_evaluation/agents/rag/evaluation/data.jsonl")
-
-    print("Evaluation completed successfully. Results>>>>>>: ", all_results)
-"""
