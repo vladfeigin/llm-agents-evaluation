@@ -6,10 +6,10 @@ AgentConfiguration:
   application_version: '1.0'
   application_name: llmops_workshop
   deployment:
-    name: gpt-4o-3
+    name: gpt-4o
     model_name: gpt-4o
-    model_version: '2024-08-01'
-    endpoint: https://openai-australia-east-303474.openai.azure.com/openai/deployments/gpt-4o-3/chat/completions?api-version=2024-10-01-preview
+    model_version: '2024-11-20'
+    endpoint: https://multi-agent-eval-demo-aiservices.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview
     openai_api_version: 2024-10-01-preview
   model_parameters:
     temperature: 0.5
