@@ -6,9 +6,15 @@ AgentConfiguration:
   application_version: '1.0'
   application_name: llmops_workshop
   deployment:
+<<<<<<< HEAD
     name: gpt-4o-mini
     model_name: gpt-4o-mini
     model_version: '2024-08-01'
+=======
+    name: gpt-4o
+    model_name: gpt-4o
+    model_version: '2024-11-20'
+>>>>>>> dbe3df79cbf0aa76206f6645102ca3aa0173241f
     endpoint: https://multi-agent-eval-demo-aiservices.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview
     openai_api_version: 2024-10-01-preview
   model_parameters:
@@ -22,7 +28,7 @@ AgentConfiguration:
       index_semantic_configuration_name: vector-llmops-workshop-index-semantic-configuration
     deployment:
       model_name: text-embedding-ada-002
-      model_version: '2024-08-01'
+      model_version: '2'
       openai_api_version: 2024-10-01-preview
       name: text-embedding-ada-002
       endpoint: https://multi-agent-eval-demo-aiservices.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15
