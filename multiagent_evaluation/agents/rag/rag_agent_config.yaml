@@ -2,33 +2,27 @@
 AgentConfiguration:
   agent_name: rag_agent
   description: RAG Agent configuration
-  config_version: '1.0'
+  config_version: '7.0'
   application_version: '1.0'
   application_name: llmops_workshop
   deployment:
-<<<<<<< HEAD
-    name: gpt-4o-mini
-    model_name: gpt-4o-mini
-    model_version: '2024-08-01'
-=======
     name: gpt-4o
     model_name: gpt-4o
     model_version: '2024-11-20'
->>>>>>> dbe3df79cbf0aa76206f6645102ca3aa0173241f
     endpoint: https://multi-agent-eval-demo-aiservices.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview
-    openai_api_version: 2024-10-01-preview
+    openai_api_version: 2024-08-01-preview
   model_parameters:
     temperature: 0.5
     seed: 42
   retrieval:
     parameters:
-      search_type: hybrid
+      search_type: similarity
       top_k: 5
       index_name: micirosoft-tech-stack-index-0
       index_semantic_configuration_name: vector-llmops-workshop-index-semantic-configuration
     deployment:
       model_name: text-embedding-ada-002
-      model_version: '2'
+      model_version: '2024-08-01'
       openai_api_version: 2024-10-01-preview
       name: text-embedding-ada-002
       endpoint: https://multi-agent-eval-demo-aiservices.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15
@@ -40,5 +34,11 @@ AgentConfiguration:
     \ an answer; only return the reformulated question. For example, if the latest\
     \ question is \u2018What about its pricing?\u2019 and the chat history discusses\
     \ Microsoft Azure, reformulate it to \u2018What is the pricing of Microsoft Azure?\u2019"
-  chat_system_prompt: "You are a domain-specific technology assistant. When you answer, you must verify that each point you include is explicitly stated in the context. 1.	Read the user’s question. 2.	Check the context for matching information. 3.	Answer solely using details found in the context. 4.	If you cannot find information in the context, politely ask for more details. \n<context>\n{context}\n</context>"
+  chat_system_prompt: "You are a domain-specific technology assistant. To provide\
+    \ high-quality responses, follow these steps: 1. Analyze the user\u2019s query\
+    \ and identify key points. 2. Cross-check the context for information that directly\
+    \ answers the query. 3. Only include details explicitly found in the context.\
+    \ 4. If information is missing, politely inform the user and ask for clarification.\
+    \ 5. Structure your response logically, ensuring clarity and coherence. <context>{context}</context>\
+    \  \n<context>\n{context}\n</context>"
   human_template: 'question: {input}'

@@ -381,6 +381,12 @@ Here is example of base variant configuration file:
 }
 ```
 
+The **"Orchestrator"** agent for generating multiple variants performs the following steps:
+1. Runs the original variant evaluation to establish baseline metrics.
+2. Creates multiple prompt variants based on the initial evaluation results.
+3. Evaluates the multiple variants.
+4. Selects the best performing variant based on the evaluation results.
+
 After running the evaluation orchestrator, you will have evaluation results for each configuration file.
 For example, here you can see top 5 most performing configurations after running the evaluation orchestrator:
 
@@ -392,6 +398,12 @@ Monitoring is a crucial part of any LLM-based project. It should be designed and
 In this project, we collect data from the RAG Agent, including tokens consumption, model parameters, and evaluation metrics. This data is crucial for cost calculations and quality analysis of LLM-based applications, helping determine the impact of changes like prompts, model parameters, model versions on application quality.
 In this project, we use the Open Telemetry standard to collect application traces, logs and metrics.
 For simplicity, logs, traces, and metrics are currently sent to Azure Application Insights. From Application Insights, they are forwarded via Azure Event Hub to Microsoft Fabric EventHouse (Kusto). We utilize Kusto Update Policies to flatten the traces and store them in the final tables. Notably, Application Insights supports the Open Telemetry standard, allowing you to view traces and logs in "Transaction Search" during development, which is convenient.
+
+To send the logs and traces to Azure Application Insights, set the `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable in the `.env` file to your Application Insights connection string.
+For visualizing traces in Azure AI Foundry, set the environment variable `AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED` to `true`.
+For more details, refer to the [Azure AI Foundry documentation](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/visualize-traces).
+
+
 Traces, logs and metrics are collected in Microsoft Fabric for further analysis and reporting.
 In the next version, we plan to introduce support for Azure Data Explorer for storing and analyzing traces, logs, and metrics.
 

@@ -66,7 +66,7 @@ def find_optimal_agent_configuration(agent: Type, eval_fn: Callable[[pd.DataFram
     # load and update variants.json
     with open(base_variant, "r", encoding="utf-8") as variants_file:
         variants: dict = json.load(variants_file)
-        # 3. generate the multiple variant for the agent configuration and evaluation
+    # 3. generate the multiple variants for evaluation
         generate_variants(CONFIG_SCHEMA, agent_config_file_dir,
                       agent_config_file_name, NUMBER_OF_VARIANTS_GENERATED, generated_prompts, variants, output_dir)
 
