@@ -12,8 +12,9 @@ This project offers a comprehensive framework, grounded in real-world production
 
 ## Project Description
 
-This project provides the framework of developing and evaluating LLM-based applications. It includes a conversational bot, the RAG Agent, which allows users to ask questions about the content in their documents. The RAG Agent serves as an example of an LLM agent being evaluated.
+This project provides the framework of developing and evaluating LLM-based applications. It includes a conversational bot, the RAG Agent, which allows users to ask questions about the content in their documents. The RAG Agent serves solely as an example of an LLM agent being evaluated.
 The project showcases effective methods for monitoring and evaluating LLM-based applications, with a strong emphasis on robust evaluation techniques.
+In addition, the project provides tools to generate multiple agent configurations (variants) and evaluate them to find the best performing one. An agent configuration (variant) is a YAML file that contains all important agent parameters such as prompts, LLM, model parameters, and more. 
 
 ### Project Structure And Modules
 
@@ -382,6 +383,7 @@ Here is example of base variant configuration file:
 ```
 
 The **"Orchestrator"** agent for generating multiple variants performs the following steps:
+
 1. Runs the original variant evaluation to establish baseline metrics.
 2. Creates multiple prompt variants based on the initial evaluation results.
 3. Evaluates the multiple variants.
@@ -402,7 +404,6 @@ For simplicity, logs, traces, and metrics are currently sent to Azure Applicatio
 To send the logs and traces to Azure Application Insights, set the `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable in the `.env` file to your Application Insights connection string.
 For visualizing traces in Azure AI Foundry, set the environment variable `AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED` to `true`.
 For more details, refer to the [Azure AI Foundry documentation](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/visualize-traces).
-
 
 Traces, logs and metrics are collected in Microsoft Fabric for further analysis and reporting.
 In the next version, we plan to introduce support for Azure Data Explorer for storing and analyzing traces, logs, and metrics.

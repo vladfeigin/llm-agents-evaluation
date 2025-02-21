@@ -22,56 +22,37 @@ multiagent_evaluation/agents/__pycache__/
 multiagent_evaluation/batch_eval_output*.json
 multiagent_evaluation/eval_results*.json
 multiagent_evaluation/session_store/__pycache__/
-
 multiagent_evaluation/agents/nl2sql/test.py
-multiagent_evaluation/session_store/__pycache__/
-
 multiagent_evaluation/evaluation_deprecated/__pycache__/
-multiagent_evaluation/session_store/__pycache__/
 multiagent_evaluation/agents/rag/evaluation/__pycache__/
 batch_eval_output*.json
 eval_results*.json
 multiagent_evaluation/evaluation\[deprecated]/__pycache__/
-
 multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
 app.log
 batch_flow_output.txt
-
 multiagent_evaluation/agents/rag/evaluation/config.json
-batch_flow_output.txt
 config.json
 multiagent_evaluation/agents/rag/rag_agent_config_base.yaml
-
 multiagent_evaluation/agents/rag/evaluation/configurations/generated/*.yaml
-
 multiagent_evaluation/agents/rag/variants.json
 multiagent_evaluation/agents/rag/rag_agent_config.yaml
-
-
 multiagent_evaluation/val-test.json
-batch_flow_output.txt
 batch_flow_output.json
 multiagent_evaluation/agents/promptgen/__pycache__/*.pyc
 multiagent_evaluation/agents/promptgen/prompt_evaluator/__pycache__/*.pyc
 multiagent_evaluation/agents/promptgen/prompt_generator/__pycache__/__init__*.pyc
 multiagent_evaluation/agents/promptgen/prompt_generator/__pycache__/prompt_generator.*.pyc
-
 multiagent_evaluation/agents/tools/__pycache__/evaluate.cpython-311.pyc
 *.pyc
-
 multiagent_evaluation/session_store/*.pyc
 multiagent_evaluation/agents/rag/evaluation/config_del.json_del
 config_del.json_del
-multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
 multiagent_evaluation/agents/orchestrator/evaluation_orchestrator_agent_config.yaml
 multiagent_evaluation/agents/prompt_evaluator/evaluator_config.yaml
-multiagent_evaluation/agents/orchestrator/evaluation_orchestrator_agent_config.yaml
-multiagent_evaluation/agents/prompt_evaluator/evaluator_config.yaml
-multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
 multiagent_evaluation/.env copy
-multiagent_evaluation/agents/rag/rag_agent_config.yaml
 multiagent_evaluation/agents/prompt_generator/prompt_generator_config.yaml
 multiagent_evaluation/.env_template
-multiagent_evaluation/.env copy
+
 
 

@@ -31,8 +31,7 @@ AgentConfiguration:
           Your goal is to achive maximum qiality scoring in limited number of evaluation loops.
           You can use any available tools and agents to evaluate the quality of the LLM agents.
           You have following agents available:
-          1. Prompt Generator - 
-          2. Prompt Evaluator -
-          3. Evalution tool
+          1. Prompt Generator
+          2. Evaluation tool
           
 
