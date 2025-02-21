@@ -20,9 +20,9 @@ The project showcases effective methods for monitoring and evaluating LLM-based 
 - **multiagent_evaluation**: main project folder.
   - **agents**: LLM agents implementations.
     - **rag**: RAG (Retrieval Augmented Generation) Agent implementation. This agent serves as a conversational bot, allowing users to ask questions about their documents. In this project, we use the RAG Agent to demonstrate the evaluation and monitoring methods.
-   - **prompt_generator**: This module generates various prompts for LLM Agent evaluations to find the most performing ones.
-    - **orchestrator**: Agent orchestrating the agents' evaluations.
-    - **tools**: Utilities for evaluation.
+  - **prompt_generator**: This module generates various prompts for LLM Agent evaluations to find the most performing ones.
+  - **orchestrator**: Agent orchestrating the agents' evaluations.
+  - **tools**: Utilities for evaluation.
   - **data_ingestion**: Utility for uploading PDF documents and indexing them into Azure AI Search.
   - **aimodel**: Wrapper on top of LLM models.
   - **aisearch**: Wrapper for search functionality. Integrates with Azure AI Search service as a search engine.
@@ -174,13 +174,13 @@ For example, to run the evaluation for the RAG Agent, execute the following comm
 
 where the parameters are:
 
-   - `agent_class`: LLM Agent main implementation class.
-   - `eval_fn`: Evaluation function implementation. This function calculates the evaluation metrics.
-   - `config_dir`: Directory where the LLM Agent configuration file is located (more details in the next sections).
-   - `config_file`: LLM Agent configuration file name.
-   - `eval_dataset`: Evaluation data set.
-   - `dump_output`: Flag to dump the evaluation results to the output files.
-   - `mode`: Evaluation mode (`single` or `multiple`). In the single mode, the evaluation is performed for a single LLM Agent configuration. In the multiple mode, the evaluation is performed for multiple configurations.
+- `agent_class`: LLM Agent main implementation class.
+- `eval_fn`: Evaluation function implementation. This function calculates the evaluation metrics.
+- `config_dir`: Directory where the LLM Agent configuration file is located (more details in the next sections).
+- `config_file`: LLM Agent configuration file name.
+- `eval_dataset`: Evaluation data set.
+- `dump_output`: Flag to dump the evaluation results to the output files.
+- `mode`: Evaluation mode (`single` or `multiple`). In the single mode, the evaluation is performed for a single LLM Agent configuration. In the multiple mode, the evaluation is performed for multiple configurations.
 
 Running this command will first evaluate the agent on the provided evaluation data set, calculate the evaluation metrics for the evaluated agent (RAG Agent in this example), and output the results to the `batch_eval_results_timestamp.json` and `eval_results_timestamp.json` files in the project root folder, as well as to the console.
 
@@ -391,6 +391,7 @@ For example, here you can see top 5 most performing configurations after running
 Monitoring is a crucial part of any LLM-based project. It should be designed and implemented from project beginning, rather than postponed to the final phases.
 In this project, we collect data from the RAG Agent, including tokens consumption, model parameters, and evaluation metrics. This data is crucial for cost calculations and quality analysis of LLM-based applications, helping determine the impact of changes like prompts, model parameters, model versions on application quality.
 In this project, we use the Open Telemetry standard to collect application traces, logs and metrics.
+For simplicity, logs, traces, and metrics are currently sent to Azure Application Insights. From Application Insights, they are forwarded via Azure Event Hub to Microsoft Fabric EventHouse (Kusto). We utilize Kusto Update Policies to flatten the traces and store them in the final tables. Notably, Application Insights supports the Open Telemetry standard, allowing you to view traces and logs in "Transaction Search" during development, which is convenient.
 Traces, logs and metrics are collected in Microsoft Fabric for further analysis and reporting.
 In the next version, we plan to introduce support for Azure Data Explorer for storing and analyzing traces, logs, and metrics.
 

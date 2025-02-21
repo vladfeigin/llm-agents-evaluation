@@ -69,3 +69,5 @@ multiagent_evaluation/agents/prompt_evaluator/evaluator_config.yaml
 multiagent_evaluation/agents/orchestrator/evaluation_orchestrator_agent_config.yaml
 multiagent_evaluation/agents/prompt_evaluator/evaluator_config.yaml
 multiagent_evaluation/session_store/__pycache__/session_store.cpython-311.pyc
+multiagent_evaluation/.env copy
+multiagent_evaluation/agents/rag/rag_agent_config.yaml
