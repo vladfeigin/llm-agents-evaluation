@@ -21,7 +21,8 @@ import os
 import json
 import argparse
 import importlib
-from typing import Tuple, Type, Callable, Optional, Any, Dict  # CHANGE: Added Optional, Any, Dict type hints
+# CHANGE: Added Optional, Any, Dict type hints
+from typing import Tuple, Type, Callable, Optional, Any, Dict
 import pandas as pd
 from langchain_core.prompts import PromptTemplate
 from multiagent_evaluation.agents.tools.evaluate import run_and_eval_flow, multi_variant_evaluation
@@ -31,36 +32,38 @@ from multiagent_evaluation.agents.tools.generate_variants import generate_varian
 from multiagent_evaluation.aimodel.ai_model import AIModel
 
 # Configure tracing and logging
-logger = configure_logging()  # CHANGE: Added logging configuration
-tracer = configure_tracing(__file__)  # CHANGE: Added tracing configuration
+logger = configure_logging()
+tracer = configure_tracing(__file__)
 
 # Constants
 PROMPT_GENERATOR_FOLDER: str = "agents/prompt_generator"
-PROMPT_GENERATOR_CONFIG_FILE: str = "prompt_generator_config.yaml"  
+PROMPT_GENERATOR_CONFIG_FILE: str = "prompt_generator_config.yaml"
 CONFIG_SCHEMA: str = "./agents/schemas/agent_config_schema.yaml"
-NUMBER_OF_VARIANTS_GENERATED: int = 5  # CHANGE: Updated number if needed
+NUMBER_OF_VARIANTS_GENERATED: int = 10 
 
 
 class Orchestrator:
-    def __init__(self, agent_config: Optional[Dict] = None) -> None:  # CHANGE: Added Optional type hint
+    def __init__(self, agent_config: Optional[Dict] = None) -> None:
         logger.info("Orchestrator.Initializing...")
         with tracer.start_as_current_span("PromptGenerator.__init__span") as span:
             try:
                 if agent_config is None:
-                    # load configuration from default variant yaml 
-                    logger.info("Orchestrator.__init__: agent_config is empty, loading default configuration")  # CHANGE
-                    agent_config = load_agent_configuration("agents/orchestrator", "evaluation_orchestrator_agent_config.yaml")
-                
+                    # load configuration from default variant yaml
+                    logger.info(
+                        "Orchestrator.__init__: agent_config is empty, loading default configuration")
+                    agent_config = load_agent_configuration(
+                        "agents/orchestrator", "evaluation_orchestrator_agent_config.yaml")
+
                 api_key = os.getenv("AZURE_OPENAI_KEY")
                 # check if agent config and api_key are provided
                 if agent_config is None or api_key is None:
-                    logger.error("Agent config and api_key are required")  # CHANGE
+                    logger.error("Agent config and api_key are required")
                     raise ValueError("Agent config and api_key are required")
 
                 self.agent_config = agent_config
-                logger.info("__init__.agent_config = %s", agent_config)  # CHANGE
+                logger.info("__init__.agent_config = %s", agent_config)
                 span.set_attribute("orchestrator_agent_config", agent_config)
-                
+
                 # init the AIModel class enveloping a LLM model
                 self.aimodel = AIModel(
                     azure_deployment=self.agent_config["AgentConfiguration"]["deployment"]["name"],
@@ -72,8 +75,8 @@ class Orchestrator:
                     }
                 )
             except Exception as e:
-                logger.exception("Error initializing Orchestrator: %s", e)  # CHANGE: Added exception logging
-    
+                logger.exception("Error initializing Orchestrator: %s", e)
+
     def find_optimal_agent_configuration(
         self,
         agent: Type,
@@ -88,26 +91,21 @@ class Orchestrator:
         Finds the optimal configuration for an agent by evaluating multiple prompt variants.
         Returns a JSON string representing the evaluation results.
         """
-        try:
-            # 1. Run initial evaluation to serve as a baseline
-            eval_res = run_and_eval_flow(
-                agent, eval_fn, agent_config_file_dir,
-                agent_config_file_name, evaluation_dataset, dump_output=False
-            )
-        except Exception as e:
-            logger.exception("Error during initial evaluation: %s", e)  # CHANGE: Added try/except
-            raise
 
-        try:
-            # 2. Generate prompt variants based on the initial evaluation
-            pgen = PromptGenerator(load_agent_configuration(PROMPT_GENERATOR_FOLDER, PROMPT_GENERATOR_CONFIG_FILE))
-            evaluated_agent_config = load_agent_configuration(agent_config_file_dir, agent_config_file_name)
-            generated_prompts = pgen.generate_prompts(
-                evaluated_agent_config["AgentConfiguration"]["chat_system_prompt"], eval_res
-            )
-        except Exception as e:
-            logger.exception("Error generating prompt variants: %s", e)  # CHANGE: Added try/except
-            raise
+        # 1. Run initial evaluation to serve as a baseline
+        eval_res = run_and_eval_flow(
+            agent, eval_fn, agent_config_file_dir,
+            agent_config_file_name, evaluation_dataset, dump_output=False
+        )
+
+        # 2. Generate prompt variants based on the initial evaluation
+        pgen = PromptGenerator(load_agent_configuration(
+            PROMPT_GENERATOR_FOLDER, PROMPT_GENERATOR_CONFIG_FILE))
+        evaluated_agent_config = load_agent_configuration(
+            agent_config_file_dir, agent_config_file_name)
+        generated_prompts = pgen.generate_prompts(
+            evaluated_agent_config["AgentConfiguration"]["chat_system_prompt"], eval_res
+        )
 
         try:
             # 3. Load the base variant definitions and generate multiple variants for evaluation
@@ -123,24 +121,22 @@ class Orchestrator:
                 output_dir
             )
         except Exception as e:
-            logger.exception("Error generating variants: %s", e)  # CHANGE: Added try/except
+            logger.exception("Error generating variants: %s", e)
             raise
 
-        try:
-            # 4. Run the evaluation for the multiple variants
-            all_results = multi_variant_evaluation(agent, eval_fn, output_dir, evaluation_dataset)
-        except Exception as e:
-            logger.exception("Error during multi-variant evaluation: %s", e)  # CHANGE: Added try/except
-            raise
+        # 4. Run the evaluation for the multiple variants
+        all_results = multi_variant_evaluation(
+            agent, eval_fn, output_dir, evaluation_dataset)
 
-        logger.info("orchestrator::find_optimal_agent_configuration#all_results = %s", all_results)
-          
+        logger.info(
+            "orchestrator::find_optimal_agent_configuration#all_results = %s", all_results)
+
         # 5. Convert results to JSON using a custom serializer
-        evaluation_results = json.dumps(all_results, default=self.__serializer__)
-        logger.info("orchestrator::find_optimal_agent_configuration#json_results = %s", evaluation_results)
-    
+        evaluation_results = json.dumps(
+            all_results, default=self.__serializer__)
+
         return evaluation_results
-    
+
     def analyze(self, evaluation_results: str) -> Any:
         """
         Analyze the evaluation results and decide on the best agent/prompt.
@@ -155,9 +151,9 @@ class Orchestrator:
                 chain = prompt_template | self.aimodel.llm()
                 return chain.invoke({"evaluation_results": evaluation_results})
         except Exception as e:
-            logger.exception("Error during analysis: %s", e)  # CHANGE: Added try/except in analyze
+            logger.exception("Error during analysis: %s", e)
             raise
-        
+
     def __serializer__(self, obj: Any) -> Any:
         if isinstance(obj, pd.DataFrame):
             return obj.to_dict(orient='records')
@@ -173,8 +169,7 @@ def import_from_path(full_path: str) -> Any:
         module = importlib.import_module(module_path)
         return getattr(module, attr_name)
     except Exception as e:
-        logger.exception("Error importing %s: %s", full_path, e)  # CHANGE: Added try/except
-        raise
+        logger.exception("Error importing %s: %s", full_path, e)
 
 
 def parse_args() -> argparse.Namespace:
@@ -234,7 +229,7 @@ def main() -> None:
         agent_class = import_from_path(args.agent_class)
         eval_fn = import_from_path(args.eval_fn)
         orchestrator = Orchestrator()
-        
+
         evaluation_results = orchestrator.find_optimal_agent_configuration(
             agent=agent_class,
             eval_fn=eval_fn,
@@ -244,18 +239,17 @@ def main() -> None:
             base_variant=args.base_variant,
             output_dir=args.output_dir
         )
-        
+
         answer = orchestrator.analyze(evaluation_results)
         logger.info("Best configuration: %s", answer)
         print(f"Best configuration = {answer}")
     except Exception as e:
-        logger.exception("Error in main execution: %s", e)  # CHANGE: Added try/except in main
+        logger.exception("Error in main execution: %s", e)
         print("An error occurred. Check logs for details.")
 
 
 if __name__ == "__main__":
     main()
-
 
 
 """ Example of running the orchestrator for RAG agent:

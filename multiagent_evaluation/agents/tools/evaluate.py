@@ -180,7 +180,9 @@ def multi_variant_evaluation(agent_class: Type,
         futures = {executor.submit(
             run_and_eval_flow, agent_class, eval_fn, variants_path, file, evaluation_dataset, False): file for file in files}
         # time.sleep(120)
-        for future in as_completed(futures, timeout=EVALUATION_TIMEOUT_SEC):
+        #timeout=EVALUATION_TIMEOUT_SEC
+        
+        for future in as_completed(futures):
             file = futures[future]
             try:
                 evaluation_res = future.result()
