@@ -6,32 +6,66 @@ AgentConfiguration:
   application_version: '1.1'
   application_name: llmops_workshop
   deployment:
-    name: gpt-4o-mini
-    model_name: gpt-4o-mini
-    model_version: '2024-08-01'
-    endpoint: https://<azure open ai instance name>.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-01-preview
+    name: gpt-4o
+    model_name: gpt-4o
+    model_version: '2024-11-20'
+    endpoint: https://<azure ai service name>.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview
     openai_api_version: 2024-10-01-preview
   model_parameters:
     temperature: 0.5
     seed: 42
-  retrieval:
-    parameters:
-      search_type: hybrid
-      top_k: 5
-      index_name: micirosoft-tech-stack-index-0
-      index_semantic_configuration_name: vector-llmops-workshop-index-semantic-configuration
-    deployment:
-      model_name: text-embedding-ada-002
-      model_version: '2024-08-01'
-      openai_api_version: 2024-10-01-preview
-      name: text-embedding-ada-002
-      endpoint: https://<azure open ai instance name>.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15
   system_prompt: > 
-          Your task is to orchestrate LLM agents quality evaluation process.
-          Your goal is to achive maximum qiality scoring in limited number of evaluation loops.
-          You can use any available tools and agents to evaluate the quality of the LLM agents.
-          You have following agents available:
-          1. Prompt Generator
-          2. Evaluation tool
+          Your task is to orchestrate LLM agents quality evaluation process and select the best performing LLM agent.
+          You will be provided with the evaluation results in triple backticks, which is a serialized python dictionary object:
+
+           "rag_agent_config_1.yaml": [
+              {{
+                "session_id": 1,
+                "question": "What's Microsoft Fabric?",
+                "answer": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses various services such as Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. Fabric integrates these components into a cohesive stack, simplifying analytics requirements by offering a seamlessly integrated, user-friendly platform. Key features: Unified data storage with OneLake, AI capabilities embedded within the platform, Centralized data management and governance,SaaS model.",
+                "context": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses data movement, processing, ingestion, transformation, real-time event routing, and report building. It offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. With Fabric, you don't need to assemble different services from multiple vendors. Instead, it offers a seamlessly integrated, user-friendly platform that simplifies your analytics requirements. Operating on a Software as a Service (SaaS) model, Fabric brings simplicity and integration to your solutions.",
+                "outputs.output": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses various functionalities including data movement, processing, ingestion, transformation, real-time event routing, and report building. The platform offers a comprehensive suite of services such as Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases.\n\nFabric operates on a Software as a Service (SaaS) model, providing a seamlessly integrated and user-friendly platform that simplifies analytics requirements. It centralizes data storage with OneLake, eliminating the need for multiple databases or data warehouses. Additionally, AI capabilities are embedded within Fabric, allowing for easy transition of raw data into actionable insights for business users.",
+                "relevance": 5.0,
+                "groundedness": 3.0,
+                "similarity": 5.0,
+                "coherence": 5.0
+              }},
+              {{
+                "session_id": 2,
+                "question": "What is OneLake in Microsoft Fabric?",
+                "answer": "OneLake in Microsoft Fabric is a unified storage system built on Azure Data Lake Storage (ADLS) Gen2. It provides a single SaaS experience and a tenant-wide store for data, serving both professional and citizen developers. OneLake simplifies data management by eliminating the need for understanding infrastructure concepts such as resource groups, RBAC, Azure Resource Manager, redundancy, or regions. It ensures easy data discovery, sharing, and uniform enforcement of policy and security settings, eliminating data silos.",
+                "context": "Microsoft Fabric integrates separate components into a cohesive stack. Instead of relying on different databases or data warehouses, you can centralize data storage with OneLake. AI capabilities are seamlessly embedded within Fabric, eliminating the need for manual integration. With Fabric, you can easily transition your raw data into actionable insights for business users. OneLake provides the data storage backbone for Fabric, bringing together data from multiple sources.",
+                "outputs.output": "OneLake is the data lake component of Microsoft Fabric, serving as a unified location to store all organizational data where various workloads operate. It is built on Azure Data Lake Storage (ADLS) Gen2 and provides a single Software as a Service (SaaS) experience for both professional and citizen developers.\n\nKey features of OneLake include:\n\n- **Centralized Data Storage**: It eliminates data silos by providing a single, unified storage system for all developers, ensuring easy data discovery, sharing, and uniform enforcement of policy and security settings.\n- **Hierarchical Structure**: OneLake is organized hierarchically, allowing users to create multiple workspaces (akin to folders) within a tenant, and multiple lakehouses (collections of files, folders, and tables) within each workspace.\n- **No Up-Front Provisioning**: There is only one OneLake per tenant, and it does not require any up-front provisioning.\n- **Integration with Microsoft Fabric**: All compute experiences in Microsoft Fabric, such as Data Engineering, Data Warehouse, and Power BI, are prewired to use OneLake as their native store, simplifying configuration.\n- **Shortcut Feature**: OneLake allows for the instant mounting of existing Platform as a Service (PaaS) storage accounts, enabling access to data without the need for migration.\n\nOverall, OneLake simplifies the management of data across an organization and enhances collaboration among developers.",
+                "relevance": 5.0,
+                "groundedness": 3.0,
+                "similarity": 4.0,
+                "coherence": 4.0
+              }},
+              {{
+                "session_id": 3,
+                "question": "What are the core services in Microsoft Fabric?",
+                "answer": "The core services include Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, Databases and Power BI. These services are designed to work together seamlessly, providing a comprehensive set of analytics experiences tailored to specific user roles and tasks. The platform operates on a Software as a Service (SaaS) model, ensuring simplicity, integration, and centralized management.",
+                "context": "Microsoft Fabric offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. These services allow users to handle data end-to-end, from ingestion to analytics, all within a unified platform. The platform's integrated services enable users to transform raw data into actionable insights through various analytics workflows.",
+                "outputs.output": "Microsoft Fabric integrates several core services, including:\n\n1. **Data Engineering**\n2. **Data Factory**\n3. **Data Science**\n4. **Data Warehouse**\n5. **Real-Time Intelligence**\n6. **Industry Solutions**\n7. **Power BI**\n\nThese services are designed to work together seamlessly within a unified SaaS foundation, tailored for distinct user roles and specific tasks.",
+                "relevance": 5.0,
+                "groundedness": 3.0,
+                "similarity": 4.0,
+                "coherence": 4.0
+              }}
+            ]
+          The key is a name of LLM agent configuration file, and the value is a list of dictionaries, each representing the evaluation results.
+          Results include a field: "outputs.output" which is the answer generated by LLM agent and the evalution metrics for every input.
+          Your task is to select the best performing LLM agent based on the evaluation results.
+          Reason your way through and explain in details your decision.
+          Evaluation results are: ```{evaluation_results}```
+          Output the name of the best performing LLM agent configuration file.
+          Provide the output in JSON format:
+          {{
+            "best_agent_variant": "<name of best performing LLM agent configuration file>",
+            "reasoning": "<The reasoning behind the decision>"
+          }}
+
+
+          
           
 

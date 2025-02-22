@@ -24,7 +24,7 @@ logger = configure_logging()
 # Get LLM configuration
 model_config = {
     "azure_endpoint": os.getenv("AZURE_OPENAI_EVALUATION_ENDPOINT"),
-    "api_key": os.getenv("AZURE_OPENAI_KEY"),
+    "api_key": os.getenv("AZURE_OPENAI_KEY_EVALUATION"),
     "azure_deployment": os.getenv("AZURE_OPENAI_EVALUATION_DEPLOYMENT"),
     "api_version": os.getenv("AZURE_OPENAI_API_VERSION"),
 }
