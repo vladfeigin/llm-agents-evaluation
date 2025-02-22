@@ -7,7 +7,16 @@
             "request": "launch",
             "module": "multiagent_evaluation.agents.orchestrator.evaluation_orchestrator",
             "cwd": "${workspaceFolder}",
-            "justMyCode": false
+            "justMyCode": false,
+            "args": [
+                "--agent_class", "multiagent_evaluation.agents.rag.rag_main.RAG",
+                "--eval_fn", "multiagent_evaluation.agents.rag.evaluation.evaluation_implementation.eval_batch",
+                "--agent_config_file_dir", "agents/rag",
+                "--agent_config_file_name", "rag_agent_config.yaml",
+                "--evaluation_dataset", "./multiagent_evaluation/agents/rag/evaluation/data.jsonl",
+                "--base_variant", "./multiagent_evaluation/agents/rag/variants.json",
+                "--output_dir", "./agents/rag/evaluation/configurations/generated"
+            ],
         }
     ]
 }

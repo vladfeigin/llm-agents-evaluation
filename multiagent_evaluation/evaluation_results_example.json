@@ -1,0 +1,59 @@
+{
+    "rag_agent_config_1.yaml": [
+        {
+            "session_id": 1,
+            "question": "What's Microsoft Fabric?",
+            "answer": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses various services such as Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. Fabric integrates these components into a cohesive stack, simplifying analytics requirements by offering a seamlessly integrated, user-friendly platform. Key features: Unified data storage with OneLake, AI capabilities embedded within the platform, Centralized data management and governance,SaaS model.",
+            "context": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses data movement, processing, ingestion, transformation, real-time event routing, and report building. It offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. With Fabric, you don't need to assemble different services from multiple vendors. Instead, it offers a seamlessly integrated, user-friendly platform that simplifies your analytics requirements. Operating on a Software as a Service (SaaS) model, Fabric brings simplicity and integration to your solutions.",
+            "outputs.output": "Microsoft Fabric is an end-to-end analytics and data platform designed for enterprises that require a unified solution. It encompasses various functionalities including data movement, processing, ingestion, transformation, real-time event routing, and report building. The platform offers a comprehensive suite of services such as Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases.\n\nFabric operates on a Software as a Service (SaaS) model, providing a seamlessly integrated and user-friendly platform that simplifies analytics requirements. It centralizes data storage with OneLake, eliminating the need for multiple databases or data warehouses. Additionally, AI capabilities are embedded within Fabric, allowing for easy transition of raw data into actionable insights for business users.",
+            "relevance": 5.0,
+            "groundedness": 3.0,
+            "similarity": 5.0,
+            "coherence": 5.0
+        },
+        {
+            "session_id": 2,
+            "question": "What is OneLake in Microsoft Fabric?",
+            "answer": "OneLake in Microsoft Fabric is a unified storage system built on Azure Data Lake Storage (ADLS) Gen2. It provides a single SaaS experience and a tenant-wide store for data, serving both professional and citizen developers. OneLake simplifies data management by eliminating the need for understanding infrastructure concepts such as resource groups, RBAC, Azure Resource Manager, redundancy, or regions. It ensures easy data discovery, sharing, and uniform enforcement of policy and security settings, eliminating data silos.",
+            "context": "Microsoft Fabric integrates separate components into a cohesive stack. Instead of relying on different databases or data warehouses, you can centralize data storage with OneLake. AI capabilities are seamlessly embedded within Fabric, eliminating the need for manual integration. With Fabric, you can easily transition your raw data into actionable insights for business users. OneLake provides the data storage backbone for Fabric, bringing together data from multiple sources.",
+            "outputs.output": "OneLake is the data lake component of Microsoft Fabric, serving as a unified location to store all organizational data where various workloads operate. It is built on Azure Data Lake Storage (ADLS) Gen2 and provides a single Software as a Service (SaaS) experience for both professional and citizen developers.\n\nKey features of OneLake include:\n\n- **Centralized Data Storage**: It eliminates data silos by providing a single, unified storage system for all developers, ensuring easy data discovery, sharing, and uniform enforcement of policy and security settings.\n- **Hierarchical Structure**: OneLake is organized hierarchically, allowing users to create multiple workspaces (akin to folders) within a tenant, and multiple lakehouses (collections of files, folders, and tables) within each workspace.\n- **No Up-Front Provisioning**: There is only one OneLake per tenant, and it does not require any up-front provisioning.\n- **Integration with Microsoft Fabric**: All compute experiences in Microsoft Fabric, such as Data Engineering, Data Warehouse, and Power BI, are prewired to use OneLake as their native store, simplifying configuration.\n- **Shortcut Feature**: OneLake allows for the instant mounting of existing Platform as a Service (PaaS) storage accounts, enabling access to data without the need for migration.\n\nOverall, OneLake simplifies the management of data across an organization and enhances collaboration among developers.",
+            "relevance": 5.0,
+            "groundedness": 3.0,
+            "similarity": 4.0,
+            "coherence": 4.0
+        },
+        {
+            "session_id": 3,
+            "question": "What are the core services in Microsoft Fabric?",
+            "answer": "The core services include Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, Databases and Power BI. These services are designed to work together seamlessly, providing a comprehensive set of analytics experiences tailored to specific user roles and tasks. The platform operates on a Software as a Service (SaaS) model, ensuring simplicity, integration, and centralized management.",
+            "context": "Microsoft Fabric offers a comprehensive suite of services including Data Engineering, Data Factory, Data Science, Real-Time Analytics, Data Warehouse, and Databases. These services allow users to handle data end-to-end, from ingestion to analytics, all within a unified platform. The platform's integrated services enable users to transform raw data into actionable insights through various analytics workflows.",
+            "outputs.output": "Microsoft Fabric integrates several core services, including:\n\n1. **Data Engineering**\n2. **Data Factory**\n3. **Data Science**\n4. **Data Warehouse**\n5. **Real-Time Intelligence**\n6. **Industry Solutions**\n7. **Power BI**\n\nThese services are designed to work together seamlessly within a unified SaaS foundation, tailored for distinct user roles and specific tasks.",
+            "relevance": 5.0,
+            "groundedness": 3.0,
+            "similarity": 4.0,
+            "coherence": 4.0
+        },
+        {
+            "session_id": 4,
+            "question": "How does Microsoft Fabric simplify analytics?",
+            "answer": "Microsoft Fabric simplifies analytics by providing a unified, end-to-end platform that integrates various data and analytics services into a single, user-friendly environment. The key points: Unified platform, SaaS model,Centralized Data Storage, centralized Governance and Security, easy of use, embedded AI ",
+            "context": "With Fabric, you don't need to assemble different services from multiple vendors. Instead, it offers a seamlessly integrated, user-friendly platform that simplifies your analytics requirements. Operating on a Software as a Service (SaaS) model, Fabric brings simplicity and integration to your solutions. It enables analytics and data handling within a single ecosystem, reducing the complexity associated with managing disparate services.",
+            "outputs.output": "Microsoft Fabric simplifies analytics by providing a unified, end-to-end platform that integrates various services into a cohesive stack. Here are the key ways it achieves this:\n\n1. **Seamless Integration**: Fabric combines multiple analytics services, such as Data Engineering, Data Factory, Data Science, Real-Time Analytics, and Data Warehouse, into a single platform. This eliminates the need to assemble different services from multiple vendors.\n\n2. **Centralized Data Storage**: It centralizes data storage with OneLake, allowing users to manage their data in one location rather than relying on different databases or data warehouses.\n\n3. **User-Friendly Experience**: The platform is designed to be user-friendly, enabling business users to quickly access and visualize data, which aids in making informed decisions.\n\n4. **AI Capabilities**: AI functionalities are embedded within Fabric, reducing the need for manual integration and allowing users to transition raw data into actionable insights easily.\n\n5. **Tailored Experiences**: Fabric offers customized user experiences tailored to specific personas and tasks, making it easier for users to navigate and utilize the platform effectively.\n\n6. **Unified Management and Governance**: It provides centralized administration and governance, ensuring security and compliance across all services, with automatic permissions and sensitivity labels.\n\nOverall, Microsoft Fabric streamlines the analytics process, allowing users to focus on deriving insights rather than managing complex integrations and infrastructure.",
+            "relevance": 5.0,
+            "groundedness": 3.0,
+            "similarity": 5.0,
+            "coherence": 4.0
+        },
+        {
+            "session_id": 5,
+            "question": "How is AI integrated in Microsoft Fabric?",
+            "answer": "AI capabilities are embedded within Fabric, removing the need for separate AI integrations. The keys benefits: Embedded AI Capabilities, Copilot in Microsoft Fabric, Unified Data Management,Automated Machine Learning, Centralized Governance and Security ",
+            "context": "AI capabilities are seamlessly embedded within Fabric, eliminating the need for manual integration. This integration simplifies workflows, allowing users to incorporate AI and ML processes directly within their analytics operations. Fabric\u2019s AI capabilities help users transition raw data into actionable insights for business users, supporting smarter decision-making and data-driven processes within enterprises.",
+            "outputs.output": "AI is integrated into Microsoft Fabric in several ways:\n\n1. **Embedded AI Capabilities**: AI functionalities are seamlessly embedded within the Fabric platform, eliminating the need for manual integration. This allows users to leverage AI for various tasks without additional setup.\n\n2. **Copilot Features**: Copilot provides generative AI features that assist users in transforming and analyzing data, generating insights, and creating visualizations and reports. It enhances productivity and streamlines workflows.\n\n3. **Data Processing and Insights**: AI capabilities facilitate the transition of raw data into actionable insights, making it easier for business users to derive value from their data.\n\n4. **Integration with Azure OpenAI**: Users can utilize Azure OpenAI to turn whiteboard sketches into data pipelines, showcasing the application of advanced AI models like GPT-40 within the Fabric environment.\n\nOverall, AI in Microsoft Fabric enhances the user experience by providing intelligent tools and capabilities that simplify data management and analysis.",
+            "relevance": 5.0,
+            "groundedness": 3.0,
+            "similarity": 5.0,
+            "coherence": 5.0
+        }
+    ]
+}
