@@ -92,7 +92,7 @@ def run_batch_with_retry(agent_class: Type, agent_config, evaluation_dataset, du
 
 
 @retry(
-    stop=stop_after_attempt(5),
+    stop=stop_after_attempt(7),
     wait=wait_exponential(multiplier=1, min=2),
     retry=retry_if_exception_type(Exception)
 )
@@ -176,7 +176,7 @@ def multi_variant_evaluation(agent_class: Type,
     print(f"files = {files}")
 
     all_eval_results = {}
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=7) as executor:
         futures = {executor.submit(
             run_and_eval_flow, agent_class, eval_fn, variants_path, file, evaluation_dataset, False): file for file in files}
         # time.sleep(120)

@@ -138,7 +138,7 @@ def eval_batch(batch_output: pd.DataFrame, dump_output: bool = False):
         eval_metrics = calculate_overall_score(scores)
     except Exception as e:
         logger.exception("An error occurred during batch evaluation: %s", e)
-        print("EXCEPTION in Evaluaitons: ", e)
+        print("EXCEPTION in Evaluations: ", e)
         raise e
 
     # Optional: Dump results to files
