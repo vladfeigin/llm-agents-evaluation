@@ -176,11 +176,11 @@ def multi_variant_evaluation(agent_class: Type,
     print(f"files = {files}")
 
     all_eval_results = {}
-    with ThreadPoolExecutor(max_workers=7) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         futures = {executor.submit(
             run_and_eval_flow, agent_class, eval_fn, variants_path, file, evaluation_dataset, False): file for file in files}
         # time.sleep(120)
-        for future in as_completed(futures, timeout=EVALUATION_TIMEOUT_SEC):
+        for future in as_completed(futures): #timeout=EVALUATION_TIMEOUT_SEC
             file = futures[future]
             try:
                 evaluation_res = future.result()
