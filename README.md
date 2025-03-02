@@ -194,8 +194,11 @@ AgentConfiguration:
 
 #### Running Evaluations
 
-Run evalations during development and in CI/CD.
-For each LLM Agent implement a specific evaluation script.
+Agent evaluation involves two main steps: 
+•	Running the agent on an evaluation dataset.
+•	Evaluating the agent's outputs.
+For each input, every agent's output is logged and evaluated. All defined metrics are computed, allowing you to derive an overall aggregated score.
+For each LLM Agent, include a dedicated evaluation script that is customized to its functionalities. 
 For example, in this project the evaluation script for the RAG Agent is  `./multiagent_evaluation/agents/rag/evaluation/evaluation_implementation.py`.
 This script uses the Azure Evaluation SDK to calculate the conversational evaluation metrics: Groundedness, Relevance, Similarity and Coherence.
 The script `./multiagent_evaluation/agents/tools/evaluate.py` is a generic script which runs specific LLM Agent evaluation implementation on evaluation data sets.
