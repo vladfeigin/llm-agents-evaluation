@@ -143,7 +143,9 @@ Trigger automatic evaluations on any changes to an Agent and fail the build if m
 
 #### Agent Configuration
 
-The core of the evaluation and monitoring process is the concept of **_Agent Configuration_** or **_Variant_**. For each Agent, a configuration file in YAML format is created, encompassing all essential settings such as prompts, LLM, model parameters, agent name, application name and more. Any update to this configuration file results in a new revision. During the evaluation of the Agents, or during their ongoing usage, the current Agent configuration revision is recorded in the logs and traces. This practice enables the comparison of evaluation metrics for each Agent for each configuration revision, facilitating the assessment of how specific configuration revisions impact their performance. It is important to note that logs and traces are collected and analyzed within Microsoft Fabric, however you can use other services for this purpose.
+The core of the evaluation and monitoring process is the concept of **_Agent Configuration_** or **_Variant_**. For each Agent, a configuration file in YAML format is created, encompassing all essential settings such as prompts, LLM, model parameters, agent name, application name and more. Any update to this configuration file results in a new revision.
+Use this configuration file when instantiating the agent to know the exact configuration under which an agent is running at any given time.  
+During the evaluation of the Agents, or during their ongoing usage, the current Agent configuration revision is recorded in the logs and traces. This practice enables the comparison of evaluation metrics for each Agent for each configuration revision, facilitating the assessment of how specific configuration revisions impact their performance. It is important to note that logs and traces are collected and analyzed within Microsoft Fabric, however you can use other services for this purpose.
 
 Example of configuration file:
 
