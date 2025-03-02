@@ -70,6 +70,8 @@ For example the evaluation data set for conversational flow (chat), could have t
 
 `context` is the background information related to the question, serving as the ground-truth for the model to generate an accurate answer.
 
+Test data sets are typically constructed as JSONL files, with each line being an independent JSON describing one conversation turn.
+
 Example:
 
 ```json
@@ -81,28 +83,63 @@ Example:
 }
 ```
 
-#### Manual Evaluation
-
-With an evaluation data set, you already can perform manual evaluations to validate the LLM, model parameters, and prompts. This process helps ensure your idea works and this is important step in developing LLM-based applications.
-Azure AI Foundry offers a Manual Evaluation tool.
-
 #### Evaluation Metrics
 
-Decide about evaluation metrics you want to measure.
-The relevant metrics for a evaluation depend on your use case.
-Consider assigning greater weights to more significant metrics according to your workflow.
-Calculate an aggregated score using these weights.
-In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
-For conversational flows, consider using metrics such as **`relevancy`**, **`similarity`**, and **`groundedness`**.
-For summarization tasks it could be **`similarity`** metric.
-In this project, we utilize the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk), which includes a variety of built-in evaluation metrics.
+In this project, we use the following evaluation metrics:
+
+##### Evaluation Metrics for Conversational Agents
+
+- **Groundedness**  
+    Evaluates whether the generated response is consistent and accurate with respect to the provided context in a RAG question-and-answer scenario.
+
+- **Relevance**  
+    Measures how effectively the response addresses the query by evaluating its accuracy, completeness, and direct connection to the question.
+
+- **Coherence**  
+    Assesses the logical and orderly presentation of ideas, ensuring the response is easy to follow and understand.
+
+- **Similarity**  
+    Determines the level of resemblance between the generated text and its ground truth in relation to the query.
+
+In this project we compute these metrics on a scale from 1 to 5. 
+For this project, we use the Azure Evaluation SDK, which offers various built-in evaluation metrics. 
+For more details, please refer to the [documentation](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk).
+
+
+##### Metrics Selection
+
+When selecting evaluation metrics, consider the following:
+
+- **Determine Relevant Metrics**  
+    Decide which metrics to measure based on your use case.
+
+- **Weight Significant Metrics**  
+    Assign greater weights to more significant metrics according to your workflow, and calculate an aggregated score.
+
+- **Multi-Agent Considerations**  
+    In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
+
+- **Use Case Examples**  
+    - For conversational flows: consider metrics such as **relevancy**, **similarity**, and **groundedness**.  
+    - For summarization tasks: the **similarity** metric might be most relevant.
+
+For this project, we use the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk), which includes a variety of built-in evaluation metrics.
+
+#### Manual Evaluation
+
+The evaluation dataset and metrics enable manual checks to validate the LLM, model parameters, and prompts, ensuring your idea works. This is essential step in developing LLM-based applications. 
 
 #### Automatic Evaluation Implementation
 
-Incorporate automatic evaluation into your project.
-The implementation depends on your flow. For conversational flows, another advanced LLM model is typically needed for evaluation, the _judge_ model.
+Add automatic evaluation to your project by using an advanced LLM model _as a judge_ for AI-assisted evaluation. 
+It's recommended to use state-of-the-art LLMs for this purpose. 
 The project in this repo uses the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk) and [Azure AI Foundry Evaluator Library](http://ai.azure.com/), which offers ready prompts specifically designed for evaluations.
-Integrate automatic evaluations into your CI/CD pipeline. Fail the build if metrics drop below predefined quality thresholds.
+
+
+#### Integration with CI/CD Pipeline
+
+Incorporate automatic evaluations into your CI/CD pipeline. 
+Trigger automatic evaluations on any changes to an Agent and fail the build if metrics fall below set thresholds.
 
 #### Agent Configuration
 
