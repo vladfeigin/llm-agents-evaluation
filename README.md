@@ -50,13 +50,13 @@ In addition, the project provides tools to generate multiple agent configuration
 
 When planning your evaluation strategy, start by preparing **evaluation data sets**.
 The data sets emulate your actual interaction with LLM or with LLM based Agent.
+This is a key part of any AI-based project and should be tackled in the early stages.
 
-Keep these points in mind:
-    - Domain experts should prepare the data sets.
-    - Tailor the data set to your use case.
-    - Start with a small size of 20-30 samples of your flow.
-    - Regularly update data sets with real production examples.
-    - For a multi-agent system, create a dedicated data set for each agent.
+- Domain experts should prepare the data sets.
+- Tailor the data sets to your specific use case.
+- Start with a small sample of 20-30 flow examples.
+- Regularly update data sets with real production examples.
+- For a multi-agent system, create a dedicated data set for each agent.
 
 For example the evaluation data set for conversational flow (chat), could have the following schema:
 
