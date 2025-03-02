@@ -193,10 +193,11 @@ AgentConfiguration:
 ```
 
 #### Running Evaluations
+Agent evaluation consists of two main steps:
 
-Agent evaluation involves two main steps: 
-•	Running the agent on an evaluation dataset.
-•	Evaluating the agent's outputs.
+1. Running the agent on an evaluation dataset.
+2. Evaluating the agent’s outputs.
+
 For each input, every agent's output is logged and evaluated. All defined metrics are computed, allowing you to derive an overall aggregated score.
 For each LLM Agent, include a dedicated evaluation script that is customized to its functionalities. 
 For example, in this project the evaluation script for the RAG Agent is  `./multiagent_evaluation/agents/rag/evaluation/evaluation_implementation.py`.
