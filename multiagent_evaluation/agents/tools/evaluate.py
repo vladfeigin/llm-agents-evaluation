@@ -24,7 +24,7 @@ tracer = configure_tracing(collection_name=TRACING_COLLECTION_NAME)
 # the function which runs an evaluation on test dataset for specific configiration of an agent
 
 
-def run_batch(agent_class: Type, agent_config: dict, evaluation_dataset_path: str, dump_output: bool = False) -> Tuple[dict, pd.DataFrame]:
+def run_evaluation_ds(agent_class: Type, agent_config: dict, evaluation_dataset_path: str, dump_output: bool = False) -> Tuple[dict, pd.DataFrame]:
     """
     Runs a batch evaluation for a given agent on a specified agent evaluation dataset.
 
@@ -65,7 +65,7 @@ def run_batch(agent_class: Type, agent_config: dict, evaluation_dataset_path: st
     if dump_output:
         # timestamp = pd.Timestamp.now().strftime("%Y%m%d%H%M%S")
         df.to_json("batch_flow_output.json", index=False)
-    return [agent_config, df]
+    return df
 
 
 @retry(
@@ -74,7 +74,7 @@ def run_batch(agent_class: Type, agent_config: dict, evaluation_dataset_path: st
     wait=wait_exponential(multiplier=1, min=2),
     retry=retry_if_exception_type(Exception)     # retry on any Exception
 )
-def run_batch_with_retry(agent_class: Type, agent_config, evaluation_dataset, dump_output=False):
+def run_evaluation_ds_with_retry(agent_class: Type, agent_config, evaluation_dataset, dump_output=False):
     """
     Executes a batch run of the given agent class with the specified configuration and evaluation dataset.
     Retries the batch run in case of failure.
@@ -88,7 +88,7 @@ def run_batch_with_retry(agent_class: Type, agent_config, evaluation_dataset, du
     Returns:
         Any: The result of the batch run (evaluation data set).
     """
-    return run_batch(agent_class, agent_config, evaluation_dataset, dump_output=dump_output)
+    return run_evaluation_ds(agent_class, agent_config, evaluation_dataset, dump_output=dump_output)
 
 
 @retry(
@@ -96,7 +96,7 @@ def run_batch_with_retry(agent_class: Type, agent_config, evaluation_dataset, du
     wait=wait_exponential(multiplier=1, min=2),
     retry=retry_if_exception_type(Exception)
 )
-def eval_batch_with_retry(eval_fn: Callable[[pd.DataFrame, bool], Tuple[pd.DataFrame, pd.DataFrame]], batch_output, dump_output=False):
+def evaluate_output_with_retry(eval_fn: Callable[[pd.DataFrame, bool], Tuple[pd.DataFrame, pd.DataFrame]], batch_output, dump_output=False):
     """
     Evaluates a batch of data using the provided evaluation function. Retries the evaluation in case of failure.
 
@@ -123,19 +123,21 @@ def run_and_eval_flow(agent_class: Type,
                       agent_config_file_name: str,
                       agent_evaluation_dataset: str,
                       dump_output: bool = False):
-    """Evaluates a batch of data (evaluation data set) using the provided evaluation function.
+    """Evaluates a input data set of data (evaluation data set) using the provided agent implementation and evaluation function.
     """
 
     with tracer.start_as_current_span("batch::evaluation::run_and_eval_flow") as span:
-        # Load the batch output from runflow
-
+      
+        # load agent configuration (input variant)
         agent_config = load_agent_configuration(
             agent_config_file_dir, agent_config_file_name)
 
         try:
-            run_config, batch_output = run_batch_with_retry(
+            # run the agent on input evaluation dataset
+            batch_output = run_evaluation_ds_with_retry(
                 agent_class, agent_config, agent_evaluation_dataset, dump_output=dump_output)
-            eval_res, eval_metrics = eval_batch_with_retry(
+            # evaluate the agent output
+            eval_res, eval_metrics = evaluate_output_with_retry(
                 eval_fn, batch_output, dump_output=dump_output)
         except Exception as e:
             logger.error("Error processing agent: %s: %s", agent_config_file_name, e)
@@ -145,7 +147,7 @@ def run_and_eval_flow(agent_class: Type,
         logger.info(
             json.dumps({
                 "name": "batch-evaluation-flow-raw",
-                "metadata": run_config,  # base_run._to_dict(),
+                "metadata": agent_config,  # base_run._to_dict(),
                 "result": eval_res.to_dict(orient='records')
             })
         )
@@ -153,7 +155,7 @@ def run_and_eval_flow(agent_class: Type,
         logger.info(
             json.dumps({
                 "name": "batch-evaluation-flow-metrics",
-                "metadata": run_config,  # base_run._to_dict(),
+                "metadata": agent_config,  # base_run._to_dict(),
                 "result": eval_metrics.to_dict(orient='records')
             })
         )
