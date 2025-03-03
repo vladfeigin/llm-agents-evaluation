@@ -101,12 +101,14 @@ In this project, we use the following evaluation metrics:
 - **Similarity**  
     Determines the level of resemblance between the generated text and its ground truth in relation to the query.
 
-In this project we compute these metrics on a scale from 1 to 5. 
+We compute these metrics on a scale from 1 to 5. 
 For this project, we use the Azure Evaluation SDK, which offers various built-in evaluation metrics. 
 For more details, please refer to the [documentation](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk).
 
 
 ##### Metrics Selection
+
+Choose and develop the appropriate metrics for your use case.
 
 When selecting evaluation metrics, consider the following:
 
