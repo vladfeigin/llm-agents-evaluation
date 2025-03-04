@@ -89,22 +89,15 @@ In this project, we use the following evaluation metrics:
 
 ##### Evaluation Metrics for Conversational Agents
 
-- **Groundedness**  
-    Evaluates whether the generated response is consistent and accurate with respect to the provided context in a RAG question-and-answer scenario.
+- **Groundedness**Evaluates whether the generated response is consistent and accurate with respect to the provided context in a RAG question-and-answer scenario.
+- **Relevance**Measures how effectively the response addresses the query by evaluating its accuracy, completeness, and direct connection to the question.
+- **Coherence**Assesses the logical and orderly presentation of ideas, ensuring the response is easy to follow and understand.
+- **Similarity**
+  Determines the level of resemblance between the generated text and its ground truth in relation to the query.
 
-- **Relevance**  
-    Measures how effectively the response addresses the query by evaluating its accuracy, completeness, and direct connection to the question.
-
-- **Coherence**  
-    Assesses the logical and orderly presentation of ideas, ensuring the response is easy to follow and understand.
-
-- **Similarity**  
-    Determines the level of resemblance between the generated text and its ground truth in relation to the query.
-
-We compute these metrics on a scale from 1 to 5. 
-For this project, we use the Azure Evaluation SDK, which offers various built-in evaluation metrics. 
+We compute these metrics on a scale from 1 to 5.
+For this project, we use the Azure Evaluation SDK, which offers various built-in evaluation metrics.
 For more details, please refer to the [documentation](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk).
-
 
 ##### Metrics Selection
 
@@ -112,41 +105,35 @@ Choose and develop the appropriate metrics for your use case.
 
 When selecting evaluation metrics, consider the following:
 
-- **Determine Relevant Metrics**  
-    Decide which metrics to measure based on your use case.
+- **Determine Relevant Metrics**Decide which metrics to measure based on your use case.
+- **Weight Significant Metrics**Assign greater weights to more significant metrics according to your workflow, and calculate an aggregated score.
+- **Multi-Agent Considerations**In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
+- **Use Case Examples**
 
-- **Weight Significant Metrics**  
-    Assign greater weights to more significant metrics according to your workflow, and calculate an aggregated score.
-
-- **Multi-Agent Considerations**  
-    In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
-
-- **Use Case Examples**  
-    - For conversational flows: consider metrics such as **relevancy**, **similarity**, and **groundedness**.  
-    - For summarization tasks: the **similarity** metric might be most relevant.
+  - For conversational flows: consider metrics such as **relevancy**, **similarity**, and **groundedness**.
+  - For summarization tasks: the **similarity** metric might be most relevant.
 
 For this project, we use the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk), which includes a variety of built-in evaluation metrics.
 
 #### Manual Evaluation
 
-The evaluation dataset and metrics enable manual checks to validate the LLM, model parameters, and prompts, ensuring your idea works. This is essential step in developing LLM-based applications. 
+The evaluation dataset and metrics enable manual checks to validate the LLM, model parameters, and prompts, ensuring your idea works. This is essential step in developing LLM-based applications.
 
 #### Automatic Evaluation Implementation
 
-Add automatic evaluation to your project by using an advanced LLM model _as a judge_ for AI-assisted evaluation. 
-It's recommended to use state-of-the-art LLMs for this purpose. 
+Add automatic evaluation to your project by using an advanced LLM model _as a judge_ for AI-assisted evaluation.
+It's recommended to use state-of-the-art LLMs for this purpose.
 The project in this repo uses the [Azure Evaluation SDK](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk) and [Azure AI Foundry Evaluator Library](http://ai.azure.com/), which offers ready prompts specifically designed for evaluations.
-
 
 #### Integration with CI/CD Pipeline
 
-Incorporate automatic evaluations into your CI/CD pipeline. 
+Incorporate automatic evaluations into your CI/CD pipeline.
 Trigger automatic evaluations on any changes to an Agent and fail the build if metrics fall below set thresholds.
 
 #### Agent Configuration
 
 The core of the evaluation and monitoring process is the concept of **_Agent Configuration_** or **_Variant_**. For each Agent, a configuration file in YAML format is created, encompassing all essential settings such as prompts, LLM, model parameters, agent name, application name and more. Any update to this configuration file results in a new revision.
-Use this configuration file when instantiating the agent to know the exact configuration under which an agent is running at any given time.  
+Use this configuration file when instantiating the agent to know the exact configuration under which an agent is running at any given time.
 During the evaluation of the Agents, or during their ongoing usage, the current Agent configuration revision is recorded in the logs and traces. This practice enables the comparison of evaluation metrics for each Agent for each configuration revision, facilitating the assessment of how specific configuration revisions impact their performance. It is important to note that logs and traces are collected and analyzed within Microsoft Fabric, however you can use other services for this purpose.
 
 Example of configuration file:
@@ -195,13 +182,14 @@ AgentConfiguration:
 ```
 
 #### Running Evaluations
+
 Agent evaluation consists of two main steps:
 
 1. Running the agent on an evaluation dataset.
 2. Evaluating the agent’s outputs.
 
 For each input, every agent's output is logged and evaluated. All defined metrics are computed, allowing you to derive an overall aggregated score.
-For each LLM Agent, include a dedicated evaluation script that is customized to its functionalities. 
+For each LLM Agent, include a dedicated evaluation script that is customized to its functionalities.
 For example, in this project the evaluation script for the RAG Agent is  `./multiagent_evaluation/agents/rag/evaluation/evaluation_implementation.py`.
 This script uses the Azure Evaluation SDK to calculate the conversational evaluation metrics: Groundedness, Relevance, Similarity and Coherence.
 The script `./multiagent_evaluation/agents/tools/evaluate.py` is a generic script which runs specific LLM Agent evaluation implementation on evaluation data sets.
@@ -435,7 +423,6 @@ The **"Orchestrator"** agent for generating multiple variants performs the follo
 3. Evaluates the multiple variants.
 4. Selects the best performing variant based on the evaluation results.
 
-
 ![Multiple variants evaluation](multiagent_evaluation/docs/img/multiple-variants-evaluation.png)
 
 The orchestrator agent reviews evaluation metrics for every variant and identifies the top-performing configuration. Below is an example of the output generated by the orchestrator:
@@ -449,11 +436,12 @@ The orchestrator agent reviews evaluation metrics for every variant and identifi
       }
     ]
 }
-````
+```
 
-
+In this example the agent variant `rag_agent_config_16.yaml` is the best performing configuration based on the evaluation metrics.
 
 After running the evaluation orchestrator, you will have evaluation results for each configuration file.
+
 For example, here you can see top 5 most performing configurations after running the evaluation orchestrator:
 
 ![Multiple Agent Configuration Evaluation](multiagent_evaluation/docs/img/Multiple-variants-evaluation-dashboard.png)
