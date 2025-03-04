@@ -89,9 +89,9 @@ In this project, we use the following evaluation metrics:
 
 ##### Evaluation Metrics for Conversational Agents
 
-- **Groundedness**Evaluates whether the generated response is consistent and accurate with respect to the provided context in a RAG question-and-answer scenario.
-- **Relevance**Measures how effectively the response addresses the query by evaluating its accuracy, completeness, and direct connection to the question.
-- **Coherence**Assesses the logical and orderly presentation of ideas, ensuring the response is easy to follow and understand.
+- **Groundedness** Evaluates whether the generated response is consistent and accurate with respect to the provided context in a RAG question-and-answer scenario.
+- **Relevance** Measures how effectively the response addresses the query by evaluating its accuracy, completeness, and direct connection to the question.
+- **Coherence** Assesses the logical and orderly presentation of ideas, ensuring the response is easy to follow and understand.
 - **Similarity**
   Determines the level of resemblance between the generated text and its ground truth in relation to the query.
 
@@ -105,9 +105,9 @@ Choose and develop the appropriate metrics for your use case.
 
 When selecting evaluation metrics, consider the following:
 
-- **Determine Relevant Metrics**Decide which metrics to measure based on your use case.
-- **Weight Significant Metrics**Assign greater weights to more significant metrics according to your workflow, and calculate an aggregated score.
-- **Multi-Agent Considerations**In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
+- **Determine Relevant Metrics** Decide which metrics to measure based on your use case.
+- **Weight Significant Metrics** Assign greater weights to more significant metrics according to your workflow, and calculate an aggregated score.
+- **Multi-Agent Considerations** In a multi-agent system, each agent may utilize a distinct set of evaluation metrics.
 - **Use Case Examples**
 
   - For conversational flows: consider metrics such as **relevancy**, **similarity**, and **groundedness**.
